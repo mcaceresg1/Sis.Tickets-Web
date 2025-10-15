@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Ticket, TicketDetail, TicketFilter, TicketListResponse } from '../models/ticket.model';
+import { Ticket, TicketDetail, TicketFilter, TicketListResponse, TicketCreateRequest, TicketUpdateRequest } from '../models/ticket.model';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -41,11 +41,11 @@ export class TicketService {
     return this.http.get<TicketDetail>(`${this.apiUrl}/${id}`);
   }
 
-  crearTicket(ticket: Partial<Ticket>): Observable<ApiResponse<number>> {
+  crearTicket(ticket: TicketCreateRequest): Observable<ApiResponse<number>> {
     return this.http.post<ApiResponse<number>>(`${this.apiUrl}`, ticket);
   }
 
-  actualizarTicket(id: number, ticket: Partial<Ticket>): Observable<ApiResponse<any>> {
+  actualizarTicket(id: number, ticket: TicketUpdateRequest): Observable<ApiResponse<any>> {
     return this.http.put<ApiResponse<any>>(`${this.apiUrl}/${id}`, ticket);
   }
 

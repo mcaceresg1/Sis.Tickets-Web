@@ -16,16 +16,14 @@ export class DashboardComponent implements OnInit {
   private router = inject(Router);
   
   currentUser: Usuario | null = null;
-  selectedMenu: string = '';
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
   }
 
-  logout(): void {
-    this.authService.logout();
-  }
-
+  /**
+   * Navega a una ruta específica
+   */
   navigateTo(route: string): void {
     this.router.navigate([route]);
   }

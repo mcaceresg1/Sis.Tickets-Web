@@ -2,14 +2,16 @@ import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { TicketService } from '../../../core/services/ticket.service';
-import { Ticket, TicketFilter } from '../../../core/models/ticket.model';
+import { TicketService } from '../../../../core/services/ticket.service';
+import { Ticket, TicketFilter } from '../../../../core/models/ticket.model';
 import { TicketDetailComponent } from '../ticket-detail/ticket-detail.component';
+import { TicketFormComponent } from '../ticket-form/ticket-form.component';
+import { TicketUpdateComponent } from '../ticket-update/ticket-update.component';
 
 @Component({
   selector: 'app-ticket-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, TicketDetailComponent],
+  imports: [CommonModule, FormsModule, TicketDetailComponent, TicketFormComponent, TicketUpdateComponent],
   templateUrl: './ticket-list.component.html',
   styleUrls: ['./ticket-list.component.scss']
 })
@@ -18,6 +20,8 @@ export class TicketListComponent implements OnInit {
   private router = inject(Router);
 
   @ViewChild(TicketDetailComponent) ticketDetailModal!: TicketDetailComponent;
+  @ViewChild(TicketFormComponent) ticketFormModal!: TicketFormComponent;
+  @ViewChild(TicketUpdateComponent) ticketUpdateModal!: TicketUpdateComponent;
 
   tickets: Ticket[] = [];
   loading = false;
@@ -97,11 +101,21 @@ export class TicketListComponent implements OnInit {
   }
 
   nuevoTicket(): void {
-    this.router.navigate(['/tickets/new']);
+    this.ticketFormModal.abrirModal();
   }
 
-  volver(): void {
-    this.router.navigate(['/dashboard']);
+  editarTicket(id: number): void {
+    this.ticketUpdateModal.abrirModal(id);
+  }
+
+  onTicketCreado(): void {
+    // Recargar la lista de tickets cuando se crea uno nuevo
+    this.cargarTickets();
+  }
+
+  onTicketActualizado(): void {
+    // Recargar la lista de tickets cuando se actualiza uno
+    this.cargarTickets();
   }
 
   get paginaInicio(): number {

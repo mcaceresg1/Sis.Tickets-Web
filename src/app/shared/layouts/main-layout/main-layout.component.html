@@ -1,0 +1,94 @@
+<div class="main-layout">
+  <!-- ========================================== -->
+  <!-- HEADER -->
+  <!-- ========================================== -->
+  <header class="header">
+    <div class="header-left">
+      <button class="menu-toggle" (click)="toggleMenu()">
+        <i class="material-icons">menu</i>
+      </button>
+      <img 
+        src="assets/images/Logo_nexwork_ERP_WHITE.png" 
+        alt="Nexwork ERP" 
+        class="header-logo" 
+        (click)="navigateToDashboard()"
+        title="Ir al Dashboard">
+    </div>
+    
+    <div class="header-right">
+      <div class="user-info">
+        <i class="material-icons">account_circle</i>
+        <span class="user-name">{{ currentUser?.nombre }} {{ currentUser?.apellidoPaterno }}</span>
+        <span class="user-role">{{ currentUser?.perfil }}</span>
+      </div>
+      <button class="btn-logout" (click)="logout()" title="Cerrar Sesión">
+        <i class="material-icons">logout</i>
+        <span>Cerrar Sesión</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="layout-body">
+    <!-- ========================================== -->
+    <!-- MENU LATERAL -->
+    <!-- ========================================== -->
+    <aside class="sidebar" [class.collapsed]="menuCollapsed">
+      <nav class="sidebar-nav">
+        <!-- Menú dinámico -->
+        <div *ngIf="isLoadingMenu" class="menu-loading">
+          <i class="material-icons spin">refresh</i>
+          <p>Cargando menú...</p>
+        </div>
+        
+        <ul class="menu-list" *ngIf="!isLoadingMenu">
+          <ng-container *ngFor="let menuItem of menuItems">
+            <ng-container *ngTemplateOutlet="menuItemTemplate; context: { $implicit: menuItem, level: 0 }"></ng-container>
+          </ng-container>
+        </ul>
+
+        <!-- Template recursivo para menú multi-nivel -->
+        <ng-template #menuItemTemplate let-item let-level="level">
+          <li class="menu-item" 
+              [class.menu-header]="isHeader(item)"
+              [class.has-submenu]="item.subItems && item.subItems.length > 0"
+              [class.expanded]="item.expanded"
+              [class.active]="selectedMenu === item.Menu"
+              [style.padding-left.px]="level > 0 ? 24 + (level * 16) : null">
+            
+            <div class="menu-item-content" (click)="navigateToMenuItem(item, $event)">
+              <!-- Icono personalizado (solo si no es guion) -->
+              <i class="material-icons menu-icon" *ngIf="item.sIcono && item.sIcono !== '-' && item.sIcono !== '—' && item.sIcono.trim() !== '' && item.sIcono.trim() !== '-'">{{ item.sIcono }}</i>
+              <!-- Icono por defecto: carpeta para cabeceras y items con guion -->
+              <i class="material-icons menu-icon" *ngIf="!item.sIcono || item.sIcono === '-' || item.sIcono === '—' || item.sIcono.trim() === '' || item.sIcono.trim() === '-'">
+                {{ isHeader(item) || item.subItems?.length ? 'folder' : (level === 0 ? 'description' : 'arrow_right') }}
+              </i>
+              <span *ngIf="!menuCollapsed" class="menu-text">{{ item.Menu }}</span>
+              <!-- Icono de expansión/colapso -->
+              <i class="material-icons expand-icon" *ngIf="item.subItems && item.subItems.length > 0 && !menuCollapsed">
+                {{ item.expanded ? 'expand_less' : 'expand_more' }}
+              </i>
+            </div>
+
+            <!-- Sub-items recursivos -->
+            <ul class="submenu-list" 
+                *ngIf="item.subItems && item.subItems.length > 0 && item.expanded && !menuCollapsed"
+                [class.level-1]="level === 0"
+                [class.level-2]="level === 1"
+                [class.level-3]="level >= 2">
+              <ng-container *ngFor="let subItem of item.subItems">
+                <ng-container *ngTemplateOutlet="menuItemTemplate; context: { $implicit: subItem, level: level + 1 }"></ng-container>
+              </ng-container>
+            </ul>
+          </li>
+        </ng-template>
+      </nav>
+    </aside>
+
+    <!-- ========================================== -->
+    <!-- CONTENT - Aquí se cargan las páginas -->
+    <!-- ========================================== -->
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

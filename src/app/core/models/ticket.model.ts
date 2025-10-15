@@ -51,3 +51,25 @@ export interface TicketListResponse {
   cantidadPorPagina: number;
 }
 
+export interface TicketCreateRequest {
+  codigo: string;
+  descripcion: string;
+  idAplicacion: number;
+  idModulo?: number | null;
+  idTipo?: number | null;
+  idEstado?: number | null;
+  idPrioridad?: number | null;
+  idImpacto?: number | null;
+}
+
+export interface TicketUpdateRequest {
+  codigo?: string;
+  descripcion?: string;
+  idAplicacion?: number | null;
+  idModulo?: number | null;
+  idTipo?: number | null;
+  idEstado?: number | null;
+  idPrioridad?: number | null;
+  idImpacto?: number | null;
+}
+

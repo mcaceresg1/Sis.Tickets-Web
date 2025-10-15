@@ -1,86 +1,120 @@
-<div class="dashboard-container">
-  <nav class="navbar">
-    <div class="navbar-brand">
-      <h1>SIS Tickets</h1>
+<div class="dashboard-page">
+  <div class="dashboard-container">
+    <div class="welcome-section">
+      <div class="welcome-header">
+        <h1>Dashboard</h1>
+        <p class="subtitle">Bienvenido, {{ currentUser?.nombre }} {{ currentUser?.apellidoPaterno }}</p>
+      </div>
     </div>
-    <div class="navbar-user">
-      <span class="user-name">{{ currentUser?.nombre }} {{ currentUser?.apellidoPaterno }}</span>
-      <button class="btn btn-outline" (click)="logout()">Cerrar Sesión</button>
-    </div>
-  </nav>
 
-  <div class="main-layout">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <nav class="sidebar-nav">
-        <ul class="menu-list">
-          <li class="menu-item" [class.active]="selectedMenu === 'tickets'" (click)="navigateTo('/tickets')">
-            <i class="material-icons">confirmation_number</i>
-            <span>Tickets</span>
-          </li>
-        </ul>
-      </nav>
-    </aside>
-
-    <!-- Main Content -->
-    <div class="dashboard-content">
-      <div class="container">
-      <h2>Dashboard</h2>
-      <p class="welcome-message">Bienvenido, {{ currentUser?.nombre }} {{ currentUser?.apellidoPaterno }}</p>
-
-      <div class="row">
-        <div class="col-md-4">
-          <div class="card" (click)="navigateTo('/tickets')">
-            <div class="card-icon tickets-icon">
-              <i class="material-icons">confirmation_number</i>
-            </div>
-            <div class="card-body">
-              <h3>Tickets</h3>
-              <p>Gestionar tickets del sistema</p>
-            </div>
-          </div>
+    <div class="stats-cards">
+      <div class="stat-card">
+        <div class="stat-icon tickets-icon">
+          <i class="material-icons">confirmation_number</i>
         </div>
-
-        <div class="col-md-4">
-          <div class="card" (click)="navigateTo('/mantenimiento')">
-            <div class="card-icon maintenance-icon">
-              <i class="material-icons">settings</i>
-            </div>
-            <div class="card-body">
-              <h3>Mantenimiento</h3>
-              <p>Gestionar catálogos del sistema</p>
-            </div>
-          </div>
+        <div class="stat-content">
+          <h3>Tickets</h3>
+          <p class="stat-number">--</p>
+          <p class="stat-label">Total de tickets</p>
         </div>
       </div>
 
-      <div class="row mt-4">
-        <div class="col-12">
-          <div class="info-card">
-            <h4>Información del Usuario</h4>
-            <div class="info-grid">
-              <div class="info-item">
-                <label>Empresa:</label>
-                <span>{{ currentUser?.sRazonSocialE }}</span>
-              </div>
-              <div class="info-item">
-                <label>Perfil:</label>
-                <span>{{ currentUser?.perfil }}</span>
-              </div>
-              <div class="info-item">
-                <label>ID Empresa:</label>
-                <span>{{ currentUser?.idEmpresa }}</span>
-              </div>
-              <div class="info-item">
-                <label>Documento:</label>
-                <span>{{ currentUser?.nroDocumento || 'N/A' }}</span>
-              </div>
-            </div>
+      <div class="stat-card">
+        <div class="stat-icon pending-icon">
+          <i class="material-icons">hourglass_empty</i>
+        </div>
+        <div class="stat-content">
+          <h3>Pendientes</h3>
+          <p class="stat-number">--</p>
+          <p class="stat-label">Por atender</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon progress-icon">
+          <i class="material-icons">pending_actions</i>
+        </div>
+        <div class="stat-content">
+          <h3>En Proceso</h3>
+          <p class="stat-number">--</p>
+          <p class="stat-label">En atención</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon resolved-icon">
+          <i class="material-icons">check_circle</i>
+        </div>
+        <div class="stat-content">
+          <h3>Resueltos</h3>
+          <p class="stat-number">--</p>
+          <p class="stat-label">Completados</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <h3>Accesos Rápidos</h3>
+      <div class="action-cards">
+        <div class="action-card" (click)="navigateTo('/gestion/tickets')">
+          <i class="material-icons">confirmation_number</i>
+          <h4>Ver Tickets</h4>
+          <p>Listar todos los tickets</p>
+        </div>
+
+        <div class="action-card" (click)="navigateTo('/gestion/tickets/new')">
+          <i class="material-icons">add_circle</i>
+          <h4>Nuevo Ticket</h4>
+          <p>Crear un ticket nuevo</p>
+        </div>
+
+        <div class="action-card" (click)="navigateTo('/mantenimiento/lusuario')">
+          <i class="material-icons">people</i>
+          <h4>Usuarios</h4>
+          <p>Gestionar usuarios</p>
+        </div>
+
+        <div class="action-card" (click)="navigateTo('/seguridad/perfiles')">
+          <i class="material-icons">badge</i>
+          <h4>Perfiles</h4>
+          <p>Gestionar perfiles</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="user-info-section">
+      <h3>Información del Usuario</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <i class="material-icons">business</i>
+          <div>
+            <label>Empresa</label>
+            <span>{{ currentUser?.sRazonSocialE }}</span>
+          </div>
+        </div>
+        <div class="info-item">
+          <i class="material-icons">badge</i>
+          <div>
+            <label>Perfil</label>
+            <span>{{ currentUser?.perfil }}</span>
+          </div>
+        </div>
+        <div class="info-item">
+          <i class="material-icons">tag</i>
+          <div>
+            <label>ID Empresa</label>
+            <span>{{ currentUser?.idEmpresa }}</span>
+          </div>
+        </div>
+        <div class="info-item">
+          <i class="material-icons">credit_card</i>
+          <div>
+            <label>Documento</label>
+            <span>{{ currentUser?.nroDocumento || 'N/A' }}</span>
           </div>
         </div>
       </div>
     </div>
-  </div>
   </div>
 </div>
 

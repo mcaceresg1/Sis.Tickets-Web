@@ -34,6 +34,12 @@ export class LoginComponent implements OnInit {
   hidePassword = true;
 
   ngOnInit(): void {
+    // Si ya está autenticado, redirigir al dashboard
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/dashboard']);
+      return;
+    }
+
     this.formLogin = this.fb.group({
       usuario: ['', Validators.required],
       clave: ['', Validators.required]

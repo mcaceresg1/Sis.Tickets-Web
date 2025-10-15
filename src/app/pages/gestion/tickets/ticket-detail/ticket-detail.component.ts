@@ -1,7 +1,7 @@
 import { Component, inject, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TicketService } from '../../../core/services/ticket.service';
-import { TicketDetail } from '../../../core/models/ticket.model';
+import { TicketService } from '../../../../core/services/ticket.service';
+import { TicketDetail } from '../../../../core/models/ticket.model';
 
 @Component({
   selector: 'app-ticket-detail',

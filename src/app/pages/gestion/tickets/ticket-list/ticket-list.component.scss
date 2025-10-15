@@ -328,3 +328,61 @@
   }
 }
 
+// Action buttons container
+.action-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+
+  button {
+    min-width: auto;
+    flex-shrink: 0;
+  }
+}
+
+// Button icon (square buttons for icons)
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Button warning (yellow) for update
+.btn-warning {
+  background-color: #ffc107;
+  color: #212529;
+  border: none;
+
+  &:hover {
+    background-color: #e0a800;
+    color: #212529;
+  }
+
+  &:active {
+    background-color: #d39e00;
+  }
+}
+

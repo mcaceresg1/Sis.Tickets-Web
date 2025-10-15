@@ -66,11 +66,35 @@ export class AuthService {
   }
 
   getCurrentUser(): Usuario | null {
-    return this.currentUserSubject.value;
+    // Si no hay usuario en el subject pero sí en storage, recargar
+    const currentUser = this.currentUserSubject.value;
+    if (!currentUser) {
+      const userStr = localStorage.getItem('currentUser');
+      if (userStr) {
+        try {
+          return JSON.parse(userStr);
+        } catch (error) {
+          console.error('Error parsing user from storage', error);
+          return null;
+        }
+      }
+    }
+    return currentUser;
   }
 
   isAuthenticated(): boolean {
-    return this.isAuthenticatedSubject.value;
+    // Verificar tanto el BehaviorSubject como el localStorage
+    // Esto previene que se pierda la sesión al navegar hacia atrás
+    const hasUser = this.isAuthenticatedSubject.value;
+    const userInStorage = localStorage.getItem('currentUser');
+    
+    // Si hay usuario en storage pero no en el subject, recargar
+    if (!hasUser && userInStorage) {
+      this.loadUserFromStorage();
+      return true;
+    }
+    
+    return hasUser || !!userInStorage;
   }
 
   getToken(): string | null {

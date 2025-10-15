@@ -1,0 +1,197 @@
+<!-- Modal Backdrop -->
+<div class="modal-backdrop" *ngIf="mostrarModal" (click)="cerrarModal()"></div>
+
+<!-- Modal -->
+<div class="modal" *ngIf="mostrarModal">
+  <div class="modal-dialog" (click)="$event.stopPropagation()">
+    <div class="modal-content">
+      <!-- Header -->
+      <div class="modal-header">
+        <h2>Actualizar Ticket #{{ ticketId }}</h2>
+        <button class="btn-close" (click)="cerrarModal()" type="button">×</button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+        <!-- Loading inicial -->
+        <div class="loading-container" *ngIf="loadingTicket">
+          <div class="spinner-border"></div>
+          <p>Cargando datos del ticket...</p>
+        </div>
+
+        <!-- Mensajes de éxito/error -->
+        <div class="alert alert-success" *ngIf="successMessage">
+          {{ successMessage }}
+        </div>
+
+        <div class="alert alert-error" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <!-- Formulario -->
+        <form [formGroup]="ticketForm" (ngSubmit)="actualizarTicket()" *ngIf="!loadingTicket">
+          <div class="form-row">
+            <!-- Código -->
+            <div class="form-group col-md-6">
+              <label for="codigo">Código <span class="required">*</span></label>
+              <input
+                type="text"
+                id="codigo"
+                class="form-control"
+                formControlName="codigo"
+                placeholder="Ej: TKT-2025-001"
+                maxlength="20"
+                [class.is-invalid]="campoEsInvalido('codigo')"
+              />
+              <div class="invalid-feedback" *ngIf="campoEsInvalido('codigo')">
+                {{ obtenerMensajeError('codigo') }}
+              </div>
+              <small class="form-text">Máximo 20 caracteres</small>
+            </div>
+
+            <!-- Aplicación -->
+            <div class="form-group col-md-6">
+              <label for="idAplicacion">Aplicación <span class="required">*</span></label>
+              <select
+                id="idAplicacion"
+                class="form-control"
+                formControlName="idAplicacion"
+                (change)="onAplicacionChange(ticketForm.value.idAplicacion)"
+                [class.is-invalid]="campoEsInvalido('idAplicacion')"
+              >
+                <option [ngValue]="null">Seleccione una aplicación</option>
+                <option *ngFor="let app of aplicaciones" [ngValue]="app.idAplicacion">
+                  {{ app.nombreAplicacion }}
+                </option>
+              </select>
+              <div class="invalid-feedback" *ngIf="campoEsInvalido('idAplicacion')">
+                {{ obtenerMensajeError('idAplicacion') }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <!-- Módulo -->
+            <div class="form-group col-md-6">
+              <label for="idModulo">Módulo</label>
+              <select
+                id="idModulo"
+                class="form-control"
+                formControlName="idModulo"
+                [disabled]="!ticketForm.value.idAplicacion || modulos.length === 0"
+              >
+                <option [ngValue]="null">Seleccione un módulo</option>
+                <option *ngFor="let modulo of modulos" [ngValue]="modulo.idModulo">
+                  {{ modulo.nombreModulo }}
+                </option>
+              </select>
+              <small class="form-text" *ngIf="!ticketForm.value.idAplicacion">
+                Primero seleccione una aplicación
+              </small>
+            </div>
+
+            <!-- Estado -->
+            <div class="form-group col-md-6">
+              <label for="idEstado">Estado</label>
+              <select
+                id="idEstado"
+                class="form-control"
+                formControlName="idEstado"
+              >
+                <option [ngValue]="null">Seleccione un estado</option>
+                <option *ngFor="let estado of estados" [ngValue]="estado.idEstado">
+                  {{ estado.nombreEstado }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <!-- Prioridad -->
+            <div class="form-group col-md-6">
+              <label for="idPrioridad">Prioridad</label>
+              <select
+                id="idPrioridad"
+                class="form-control"
+                formControlName="idPrioridad"
+              >
+                <option [ngValue]="null">Seleccione una prioridad</option>
+                <option *ngFor="let prioridad of prioridades" [ngValue]="prioridad.idPrioridad">
+                  {{ prioridad.nombrePrioridad }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Impacto -->
+            <div class="form-group col-md-6">
+              <label for="idImpacto">Impacto</label>
+              <select
+                id="idImpacto"
+                class="form-control"
+                formControlName="idImpacto"
+              >
+                <option [ngValue]="null">Seleccione un impacto</option>
+                <option *ngFor="let impacto of impactos" [ngValue]="impacto.idImpacto">
+                  {{ impacto.nombreImpacto }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Descripción -->
+          <div class="form-group">
+            <label for="descripcion">Descripción <span class="required">*</span></label>
+            <textarea
+              id="descripcion"
+              class="form-control"
+              formControlName="descripcion"
+              rows="5"
+              placeholder="Describa detalladamente el ticket..."
+              [class.is-invalid]="campoEsInvalido('descripcion')"
+            ></textarea>
+            <div class="invalid-feedback" *ngIf="campoEsInvalido('descripcion')">
+              {{ obtenerMensajeError('descripcion') }}
+            </div>
+          </div>
+
+          <!-- Información adicional del ticket -->
+          <div class="ticket-info" *ngIf="ticketActual">
+            <div class="info-row">
+              <span class="info-label">Fecha de creación:</span>
+              <span class="info-value">{{ ticketActual.dfechaTicket }}</span>
+            </div>
+            <div class="info-row" *ngIf="ticketActual.sVersion">
+              <span class="info-label">Versión:</span>
+              <span class="info-value">{{ ticketActual.sVersion }}</span>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cerrarModal()"
+          [disabled]="loading"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="actualizarTicket()"
+          [disabled]="loading || loadingTicket || ticketForm.invalid"
+        >
+          <span *ngIf="!loading">Actualizar Ticket</span>
+          <span *ngIf="loading">
+            <span class="spinner-border spinner-border-sm mr-2"></span>
+            Actualizando...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
