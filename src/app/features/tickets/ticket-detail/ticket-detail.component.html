@@ -1,0 +1,85 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="cerrarModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Detalle de Ticket</h2>
+      <button class="btn-close" (click)="cerrarModal()">&times;</button>
+    </div>
+
+    <div class="modal-body" *ngIf="!loading && ticket">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>Código:</label>
+          <span class="value">{{ ticket.sCodigo }}</span>
+        </div>
+
+        <div class="detail-item">
+          <label>Fecha:</label>
+          <span class="value">{{ ticket.dfechaTicket }}</span>
+        </div>
+
+        <div class="detail-item">
+          <label>ID Usuario:</label>
+          <span class="value">{{ ticket.IdUsuario }}</span>
+        </div>
+
+        <div class="detail-item">
+          <label>ID Módulo:</label>
+          <span class="value">{{ ticket.IdModulo }}</span>
+        </div>
+
+        <div class="detail-item">
+          <label>ID Aplicación:</label>
+          <span class="value">{{ ticket.IdAplicacion }}</span>
+        </div>
+
+        <div class="detail-item">
+          <label>ID Tipo:</label>
+          <span class="value">{{ ticket.IdTipo }}</span>
+        </div>
+
+        <div class="detail-item">
+          <label>ID Prioridad:</label>
+          <span class="value">{{ ticket.IdPrioridad }}</span>
+        </div>
+
+        <div class="detail-item">
+          <label>ID Estado:</label>
+          <span class="value">{{ ticket.IdEstado }}</span>
+        </div>
+
+        <div class="detail-item">
+          <label>ID Impacto:</label>
+          <span class="value">{{ ticket.IdInpacto }}</span>
+        </div>
+
+        <div class="detail-item">
+          <label>Versión:</label>
+          <span class="value">{{ ticket.sVersion || 'N/A' }}</span>
+        </div>
+
+        <div class="detail-item full-width">
+          <label>Descripción:</label>
+          <div class="description-content" [innerHTML]="ticket.sDescripcion"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-body" *ngIf="loading">
+      <div class="loading-container">
+        <div class="spinner-border"></div>
+        <p>Cargando detalle del ticket...</p>
+      </div>
+    </div>
+
+    <div class="modal-body" *ngIf="errorMessage">
+      <div class="alert alert-error">
+        {{ errorMessage }}
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="cerrarModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+

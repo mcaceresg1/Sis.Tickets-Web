@@ -1,35 +1,54 @@
-import { Component } from '@angular/core';
+import { Component, inject, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { TicketService } from '../../../core/services/ticket.service';
+import { TicketDetail } from '../../../core/models/ticket.model';
 
 @Component({
   selector: 'app-ticket-detail',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="page-container">
-      <div class="page-header">
-        <h1>Detalle de Ticket</h1>
-      </div>
-      <div class="page-content">
-        <p>Detalle del ticket (en construcción)</p>
-        <button class="btn btn-secondary" (click)="volver()">Volver</button>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .page-container { padding: 20px; }
-    .page-header { margin-bottom: 20px; }
-    .page-content { background: white; padding: 30px; border-radius: 8px; }
-    .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
-    .btn-secondary { background-color: #6c757d; color: white; }
-  `]
+  templateUrl: './ticket-detail.component.html',
+  styleUrls: ['./ticket-detail.component.scss']
 })
 export class TicketDetailComponent {
-  constructor(private router: Router) {}
+  private ticketService = inject(TicketService);
 
-  volver(): void {
-    this.router.navigate(['/tickets']);
+  @Output() closed = new EventEmitter<void>();
+
+  isOpen = false;
+  loading = false;
+  errorMessage = '';
+  ticket: TicketDetail | null = null;
+  ticketId: number | null = null;
+
+  abrirModal(id: number): void {
+    this.ticketId = id;
+    this.isOpen = true;
+    this.cargarTicket(id);
+  }
+
+  cerrarModal(): void {
+    this.isOpen = false;
+    this.ticket = null;
+    this.ticketId = null;
+    this.errorMessage = '';
+    this.closed.emit();
+  }
+
+  private cargarTicket(id: number): void {
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.ticketService.obtenerTicket(id).subscribe({
+      next: (data) => {
+        this.loading = false;
+        this.ticket = data;
+      },
+      error: (error) => {
+        this.loading = false;
+        this.errorMessage = 'Error al cargar el detalle del ticket';
+        console.error('Error:', error);
+      }
+    });
   }
 }
-

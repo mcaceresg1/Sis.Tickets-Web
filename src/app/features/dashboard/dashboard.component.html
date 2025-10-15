@@ -9,8 +9,22 @@
     </div>
   </nav>
 
-  <div class="dashboard-content">
-    <div class="container">
+  <div class="main-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <ul class="menu-list">
+          <li class="menu-item" [class.active]="selectedMenu === 'tickets'" (click)="navigateTo('/tickets')">
+            <i class="material-icons">confirmation_number</i>
+            <span>Tickets</span>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+      <div class="container">
       <h2>Dashboard</h2>
       <p class="welcome-message">Bienvenido, {{ currentUser?.nombre }} {{ currentUser?.apellidoPaterno }}</p>
 
@@ -23,18 +37,6 @@
             <div class="card-body">
               <h3>Tickets</h3>
               <p>Gestionar tickets del sistema</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-4">
-          <div class="card" (click)="navigateTo('/tickets/new')">
-            <div class="card-icon new-ticket-icon">
-              <i class="material-icons">add_circle</i>
-            </div>
-            <div class="card-body">
-              <h3>Nuevo Ticket</h3>
-              <p>Crear un nuevo ticket</p>
             </div>
           </div>
         </div>
@@ -78,6 +80,7 @@
         </div>
       </div>
     </div>
+  </div>
   </div>
 </div>
 

@@ -1,34 +1,53 @@
 export interface Ticket {
-  idTicket: number;
-  numeroTicket: string;
-  asunto: string;
-  descripcion: string;
-  idAplicacion: number;
-  nombreAplicacion: string;
-  idModulo: number;
-  nombreModulo: string;
-  idEmpresa: number;
-  nombreEmpresa: string;
-  idEstado: number;
-  nombreEstado: string;
-  idPrioridad: number;
-  nombrePrioridad: string;
-  idImpacto: number;
-  nombreImpacto: string;
-  idUsuarioCreador: number;
-  nombreUsuarioCreador: string;
-  idUsuarioAsignado?: number;
-  nombreUsuarioAsignado?: string;
-  fechaCreacion: Date;
-  fechaActualizacion?: Date;
-  fechaCierre?: Date;
-  adjuntos?: string;
-  comentarios?: string;
+  Total: number;
+  item: string;
+  IdTickets: number;
+  sCodigo: string;
+  sDescripcion: string;
+  Usuario: string;
+  Aplicacion: string;
+  Modulo: string;
+  Tipo: string;
+  Prioridad: string;
+  Estado: string;
+  Inpacto: string;
+  iId_usuario: number;
+  totalPaginas: number;
+}
+
+export interface TicketDetail {
+  IdTickets: number;
+  sCodigo: string;
+  IdUsuario: number;
+  dfechaTicket: string;
+  IdModulo: number;
+  sDescripcion: string;
+  IdTipo: number;
+  IdAplicacion: number;
+  IdPrioridad: number;
+  IdEstado: number;
+  IdInpacto: number;
+  sVersion: string | null;
 }
 
 export interface TicketFilter {
-  idEmpresa?: number;
-  idEstado?: number;
-  idUsuarioCreador?: number;
+  Usuario?: number;
+  Aplicacion?: number;
+  Modulo?: number;
+  Tipo?: number;
+  Prioridad?: number;
+  Estado?: number;
+  Inpacto?: number;
+  numPagina?: number;
+  allReg?: number;
+  iCantFilas?: number;
+}
+
+export interface TicketListResponse {
+  tickets: Ticket[];
+  total: number;
+  totalPaginas: number;
+  paginaActual: number;
+  cantidadPorPagina: number;
 }
 

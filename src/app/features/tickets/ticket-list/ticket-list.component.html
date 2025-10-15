@@ -7,32 +7,67 @@
     </div>
   </div>
 
+  <!-- Error Message -->
+  <div class="alert alert-error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
   <div class="page-content" *ngIf="!loading">
+    <!-- Información de paginación -->
+    <div class="pagination-info" *ngIf="tickets.length > 0">
+      <div class="info-text">
+        Mostrando {{ paginaInicio }} - {{ paginaFin }} de {{ total }} tickets
+      </div>
+      <div class="rows-per-page">
+        <label>Filas por página:</label>
+        <select [(ngModel)]="cantidadPorPagina" (change)="cambiarCantidadPorPagina(cantidadPorPagina)">
+          <option [value]="5">5</option>
+          <option [value]="10">10</option>
+          <option [value]="20">20</option>
+          <option [value]="50">50</option>
+        </select>
+      </div>
+    </div>
+
     <div class="table-responsive">
       <table class="table">
         <thead>
           <tr>
-            <th>Número</th>
-            <th>Asunto</th>
-            <th>Estado</th>
+            <th>#</th>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Usuario</th>
+            <th>Aplicación</th>
+            <th>Módulo</th>
+            <th>Tipo</th>
             <th>Prioridad</th>
-            <th>Empresa</th>
-            <th>Creado por</th>
-            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Impacto</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let ticket of tickets">
-            <td>{{ ticket.numeroTicket }}</td>
-            <td>{{ ticket.asunto }}</td>
-            <td><span class="badge badge-estado">{{ ticket.nombreEstado }}</span></td>
-            <td><span class="badge badge-prioridad">{{ ticket.nombrePrioridad }}</span></td>
-            <td>{{ ticket.nombreEmpresa }}</td>
-            <td>{{ ticket.nombreUsuarioCreador }}</td>
-            <td>{{ ticket.fechaCreacion | date:'short' }}</td>
+            <td>{{ ticket.item }}</td>
+            <td class="text-nowrap">{{ ticket.sCodigo }}</td>
+            <td class="descripcion-cell" [title]="ticket.sDescripcion">
+              {{ ticket.sDescripcion.length > 50 ? (ticket.sDescripcion.substring(0, 50) + '...') : ticket.sDescripcion }}
+            </td>
+            <td>{{ ticket.Usuario }}</td>
+            <td>{{ ticket.Aplicacion }}</td>
+            <td>{{ ticket.Modulo }}</td>
+            <td><span class="badge badge-tipo">{{ ticket.Tipo }}</span></td>
+            <td><span class="badge badge-prioridad" [class.badge-urgente]="ticket.Prioridad === 'URGENTE'" [class.badge-normal]="ticket.Prioridad === 'NORMAL'">{{ ticket.Prioridad }}</span></td>
+            <td><span class="badge badge-estado" 
+                [class.badge-por-asignar]="ticket.Estado === 'POR ASIGNAR'"
+                [class.badge-asignado]="ticket.Estado === 'ASIGNADO'"
+                [class.badge-por-probar]="ticket.Estado === 'POR PROBAR'">{{ ticket.Estado }}</span></td>
+            <td><span class="badge badge-impacto"
+                [class.badge-bajo]="ticket.Inpacto === 'BAJO'"
+                [class.badge-medio]="ticket.Inpacto === 'MEDIO'"
+                [class.badge-alto]="ticket.Inpacto === 'ALTO\r\n' || ticket.Inpacto === 'ALTO'">{{ ticket.Inpacto }}</span></td>
             <td>
-              <button class="btn btn-sm btn-info" (click)="verDetalle(ticket.idTicket)">Ver</button>
+              <button class="btn btn-sm btn-info" (click)="verDetalle(ticket.IdTickets)">Ver</button>
             </td>
           </tr>
         </tbody>
@@ -42,6 +77,38 @@
         <p>No hay tickets para mostrar</p>
       </div>
     </div>
+
+    <!-- Paginación -->
+    <div class="pagination-controls" *ngIf="totalPaginas > 1">
+      <button class="btn btn-pagination" 
+              [disabled]="paginaActual === 1" 
+              (click)="cambiarPagina(1)">
+        ««
+      </button>
+      <button class="btn btn-pagination" 
+              [disabled]="paginaActual === 1" 
+              (click)="cambiarPagina(paginaActual - 1)">
+        «
+      </button>
+      
+      <button *ngFor="let pagina of paginas" 
+              class="btn btn-pagination" 
+              [class.active]="pagina === paginaActual"
+              (click)="cambiarPagina(pagina)">
+        {{ pagina }}
+      </button>
+      
+      <button class="btn btn-pagination" 
+              [disabled]="paginaActual === totalPaginas" 
+              (click)="cambiarPagina(paginaActual + 1)">
+        »
+      </button>
+      <button class="btn btn-pagination" 
+              [disabled]="paginaActual === totalPaginas" 
+              (click)="cambiarPagina(totalPaginas)">
+        »»
+      </button>
+    </div>
   </div>
 
   <div class="loading-container" *ngIf="loading">
@@ -49,4 +116,7 @@
     <p>Cargando tickets...</p>
   </div>
 </div>
+
+<!-- Modal de detalle -->
+<app-ticket-detail></app-ticket-detail>
 

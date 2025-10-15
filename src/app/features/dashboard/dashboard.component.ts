@@ -16,6 +16,7 @@ export class DashboardComponent implements OnInit {
   private router = inject(Router);
   
   currentUser: Usuario | null = null;
+  selectedMenu: string = '';
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
