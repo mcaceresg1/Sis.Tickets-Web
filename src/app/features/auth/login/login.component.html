@@ -1,0 +1,68 @@
+<section class="fondo">
+  <div class="login-container">
+    <div class="login-card">
+      <div class="logo-container">
+        <img
+          class="logo"
+          src="/assets/images/Logo_nexwork_ERP.png"
+          alt="Nexwork ERP Logo"
+        />
+      </div>
+      
+      <div class="app-title">
+        <p>Tickets Control</p>
+      </div>
+
+      <form (ngSubmit)="sendLogin()" [formGroup]="formLogin" class="login-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Usuario*</mat-label>
+          <input
+            matInput
+            type="text"
+            formControlName="usuario"
+            placeholder="Ingrese su usuario"
+          />
+          <mat-icon matPrefix>person</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contraseña*</mat-label>
+          <input
+            matInput
+            [type]="hidePassword ? 'password' : 'text'"
+            formControlName="clave"
+            placeholder="Ingrese su contraseña"
+          />
+          <mat-icon matPrefix>lock</mat-icon>
+          <button 
+            mat-icon-button 
+            matSuffix 
+            type="button"
+            (click)="hidePassword = !hidePassword"
+            [attr.aria-label]="'Ocultar contraseña'"
+            [attr.aria-pressed]="hidePassword"
+          >
+            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <div class="error-message" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <button
+          type="submit"
+          class="login-button"
+          [disabled]="formLogin.invalid || loading"
+        >
+          <span *ngIf="!loading">INGRESAR</span>
+          <span *ngIf="loading">Cargando...</span>
+        </button>
+      </form>
+
+      <div class="version">
+        <p>V_1.0.0</p>
+      </div>
+    </div>
+  </div>
+</section>

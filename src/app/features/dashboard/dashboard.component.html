@@ -1,0 +1,83 @@
+<div class="dashboard-container">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <h1>SIS Tickets</h1>
+    </div>
+    <div class="navbar-user">
+      <span class="user-name">{{ currentUser?.nombre }} {{ currentUser?.apellidoPaterno }}</span>
+      <button class="btn btn-outline" (click)="logout()">Cerrar Sesión</button>
+    </div>
+  </nav>
+
+  <div class="dashboard-content">
+    <div class="container">
+      <h2>Dashboard</h2>
+      <p class="welcome-message">Bienvenido, {{ currentUser?.nombre }} {{ currentUser?.apellidoPaterno }}</p>
+
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card" (click)="navigateTo('/tickets')">
+            <div class="card-icon tickets-icon">
+              <i class="material-icons">confirmation_number</i>
+            </div>
+            <div class="card-body">
+              <h3>Tickets</h3>
+              <p>Gestionar tickets del sistema</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card" (click)="navigateTo('/tickets/new')">
+            <div class="card-icon new-ticket-icon">
+              <i class="material-icons">add_circle</i>
+            </div>
+            <div class="card-body">
+              <h3>Nuevo Ticket</h3>
+              <p>Crear un nuevo ticket</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card" (click)="navigateTo('/mantenimiento')">
+            <div class="card-icon maintenance-icon">
+              <i class="material-icons">settings</i>
+            </div>
+            <div class="card-body">
+              <h3>Mantenimiento</h3>
+              <p>Gestionar catálogos del sistema</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="info-card">
+            <h4>Información del Usuario</h4>
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Empresa:</label>
+                <span>{{ currentUser?.sRazonSocialE }}</span>
+              </div>
+              <div class="info-item">
+                <label>Perfil:</label>
+                <span>{{ currentUser?.perfil }}</span>
+              </div>
+              <div class="info-item">
+                <label>ID Empresa:</label>
+                <span>{{ currentUser?.idEmpresa }}</span>
+              </div>
+              <div class="info-item">
+                <label>Documento:</label>
+                <span>{{ currentUser?.nroDocumento || 'N/A' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
