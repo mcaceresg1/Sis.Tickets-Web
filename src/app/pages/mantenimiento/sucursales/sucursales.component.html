@@ -1,10 +1,277 @@
 <div class="page-container">
   <div class="page-header">
-    <h2>Gestión de Sucursales</h2>
-    <p class="subtitle">Administre las sucursales de las empresas</p>
+    <h1>Gestión de Sucursales</h1>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="abrirModalNuevo()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+        </svg>
+        Nueva Sucursal
+      </button>
+    </div>
   </div>
-  
-  <div class="page-content">
-    <p>Componente en construcción...</p>
+
+  <!-- Error Message -->
+  <div class="alert alert-error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Filtro por Empresa -->
+  <div class="filter-section" *ngIf="empresas.length > 0">
+    <div class="form-group-inline">
+      <label for="empresaFilter">Empresa:</label>
+      <select id="empresaFilter" 
+              class="form-control"
+              [(ngModel)]="idEmpresaSeleccionada"
+              (change)="onEmpresaChange(idEmpresaSeleccionada)">
+        <option *ngFor="let empresa of empresas" [value]="empresa.id">
+          {{ empresa.nombre }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Tabla de Sucursales -->
+  <div class="page-content" *ngIf="!loading">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Código</th>
+            <th>Empresa</th>
+            <th>Tipo</th>
+            <th>País</th>
+            <th>Departamento</th>
+            <th>Provincia</th>
+            <th>Distrito</th>
+            <th>Dirección</th>
+            <th>Teléfono</th>
+            <th>Celular</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let sucursal of sucursales">
+            <td>{{ sucursal.IdSucursal }}</td>
+            <td class="text-nowrap">{{ sucursal.sCodigo }}</td>
+            <td>{{ sucursal.srazonSocialE }}</td>
+            <td>{{ sucursal.sDescripcion }}</td>
+            <td>{{ sucursal.sDesc }}</td>
+            <td>{{ sucursal.Departamento }}</td>
+            <td>{{ sucursal.Provincia }}</td>
+            <td>{{ sucursal.Distrito }}</td>
+            <td class="text-truncate" [title]="sucursal.sDireccion">{{ sucursal.sDireccion }}</td>
+            <td>{{ sucursal.sTelefono }}</td>
+            <td>{{ sucursal.sCelular }}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-icon btn-warning" 
+                        (click)="abrirModalEditar(sucursal)" 
+                        title="Editar sucursal">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="no-data" *ngIf="sucursales.length === 0">
+        <p>No hay sucursales registradas para esta empresa</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner-border"></div>
+    <p>Cargando sucursales...</p>
+  </div>
+</div>
+
+<!-- Modal para Crear/Editar Sucursal -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ tituloModal }}</h2>
+      <button class="btn-close" (click)="cerrarModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Success Message -->
+      <div class="alert alert-success" *ngIf="successMessage">
+        {{ successMessage }}
+      </div>
+
+      <!-- Error Message -->
+      <div class="alert alert-error" *ngIf="errorModal">
+        {{ errorModal }}
+      </div>
+
+      <form [formGroup]="sucursalForm" (ngSubmit)="guardarSucursal()">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sCodigo">Código <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="sCodigo" 
+              class="form-control"
+              [class.is-invalid]="campoEsInvalido('sCodigo')"
+              formControlName="sCodigo"
+              maxlength="10"
+              placeholder="Ej: 001, 002">
+            <div class="invalid-feedback" *ngIf="campoEsInvalido('sCodigo')">
+              {{ obtenerMensajeError('sCodigo') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="IdEmpresa">Empresa <span class="required">*</span></label>
+            <select 
+              id="IdEmpresa" 
+              class="form-control"
+              [class.is-invalid]="campoEsInvalido('IdEmpresa')"
+              formControlName="IdEmpresa">
+              <option value="">Seleccione...</option>
+              <option *ngFor="let empresa of empresas" [value]="empresa.id">
+                {{ empresa.nombre }}
+              </option>
+            </select>
+            <div class="invalid-feedback" *ngIf="campoEsInvalido('IdEmpresa')">
+              {{ obtenerMensajeError('IdEmpresa') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="IdPais">País <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="IdPais" 
+              class="form-control"
+              [class.is-invalid]="campoEsInvalido('IdPais')"
+              formControlName="IdPais"
+              maxlength="10"
+              placeholder="Ej: 01">
+            <div class="invalid-feedback" *ngIf="campoEsInvalido('IdPais')">
+              {{ obtenerMensajeError('IdPais') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="TipoEmpresa">Tipo Empresa <span class="required">*</span></label>
+            <input 
+              type="number" 
+              id="TipoEmpresa" 
+              class="form-control"
+              [class.is-invalid]="campoEsInvalido('TipoEmpresa')"
+              formControlName="TipoEmpresa"
+              placeholder="Ej: 1">
+            <div class="invalid-feedback" *ngIf="campoEsInvalido('TipoEmpresa')">
+              {{ obtenerMensajeError('TipoEmpresa') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="IdDepartamento">Departamento <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="IdDepartamento" 
+              class="form-control"
+              [class.is-invalid]="campoEsInvalido('IdDepartamento')"
+              formControlName="IdDepartamento"
+              maxlength="2"
+              placeholder="Ej: 15">
+            <div class="invalid-feedback" *ngIf="campoEsInvalido('IdDepartamento')">
+              {{ obtenerMensajeError('IdDepartamento') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="IdProvincia">Provincia <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="IdProvincia" 
+              class="form-control"
+              [class.is-invalid]="campoEsInvalido('IdProvincia')"
+              formControlName="IdProvincia"
+              maxlength="2"
+              placeholder="Ej: 01">
+            <div class="invalid-feedback" *ngIf="campoEsInvalido('IdProvincia')">
+              {{ obtenerMensajeError('IdProvincia') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="IdDistrito">Distrito <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="IdDistrito" 
+              class="form-control"
+              [class.is-invalid]="campoEsInvalido('IdDistrito')"
+              formControlName="IdDistrito"
+              maxlength="2"
+              placeholder="Ej: 18">
+            <div class="invalid-feedback" *ngIf="campoEsInvalido('IdDistrito')">
+              {{ obtenerMensajeError('IdDistrito') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="sDireccion">Dirección</label>
+          <textarea 
+            id="sDireccion" 
+            class="form-control"
+            formControlName="sDireccion"
+            rows="2"
+            placeholder="Ej: Av. Principal 123, Piso 5"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sTelefono">Teléfono</label>
+            <input 
+              type="text" 
+              id="sTelefono" 
+              class="form-control"
+              formControlName="sTelefono"
+              maxlength="30"
+              placeholder="Ej: 01-1234567">
+          </div>
+
+          <div class="form-group">
+            <label for="sCelular">Celular</label>
+            <input 
+              type="text" 
+              id="sCelular" 
+              class="form-control"
+              formControlName="sCelular"
+              maxlength="30"
+              placeholder="Ej: 987654321">
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModal()" [disabled]="loadingModal">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="loadingModal">
+            <span *ngIf="!loadingModal">{{ modoEdicion ? 'Actualizar' : 'Guardar' }}</span>
+            <span *ngIf="loadingModal">Guardando...</span>
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>

@@ -54,8 +54,8 @@
                 [class.is-invalid]="campoEsInvalido('idAplicacion')"
               >
                 <option [ngValue]="null">Seleccione una aplicación</option>
-                <option *ngFor="let app of aplicaciones" [ngValue]="app.idAplicacion">
-                  {{ app.nombreAplicacion }}
+                <option *ngFor="let app of aplicaciones" [ngValue]="app.Id">
+                  {{ app.Descripcion }}
                 </option>
               </select>
               <div class="invalid-feedback" *ngIf="campoEsInvalido('idAplicacion')">
@@ -75,13 +75,30 @@
                 [disabled]="!ticketForm.value.idAplicacion || modulos.length === 0"
               >
                 <option [ngValue]="null">Seleccione un módulo</option>
-                <option *ngFor="let modulo of modulos" [ngValue]="modulo.idModulo">
-                  {{ modulo.nombreModulo }}
+                <option *ngFor="let modulo of modulos" [ngValue]="modulo.Id">
+                  {{ modulo.Descripcion }}
                 </option>
               </select>
               <small class="form-text" *ngIf="!ticketForm.value.idAplicacion">
                 Primero seleccione una aplicación
               </small>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <!-- Tipo de Incidencia -->
+            <div class="form-group col-md-6">
+              <label for="idTipo">Tipo de Incidencia</label>
+              <select
+                id="idTipo"
+                class="form-control"
+                formControlName="idTipo"
+              >
+                <option [ngValue]="null">Seleccione un tipo</option>
+                <option *ngFor="let tipo of tiposIncidencia" [ngValue]="tipo.Id">
+                  {{ tipo.Descripcion }}
+                </option>
+              </select>
             </div>
 
             <!-- Estado -->
@@ -93,8 +110,8 @@
                 formControlName="idEstado"
               >
                 <option [ngValue]="null">Seleccione un estado</option>
-                <option *ngFor="let estado of estados" [ngValue]="estado.idEstado">
-                  {{ estado.nombreEstado }}
+                <option *ngFor="let estado of estados" [ngValue]="estado.Id">
+                  {{ estado.Descripcion }}
                 </option>
               </select>
             </div>
@@ -110,8 +127,8 @@
                 formControlName="idPrioridad"
               >
                 <option [ngValue]="null">Seleccione una prioridad</option>
-                <option *ngFor="let prioridad of prioridades" [ngValue]="prioridad.idPrioridad">
-                  {{ prioridad.nombrePrioridad }}
+                <option *ngFor="let prioridad of prioridades" [ngValue]="prioridad.Id">
+                  {{ prioridad.Descripcion }}
                 </option>
               </select>
             </div>
@@ -125,8 +142,8 @@
                 formControlName="idImpacto"
               >
                 <option [ngValue]="null">Seleccione un impacto</option>
-                <option *ngFor="let impacto of impactos" [ngValue]="impacto.idImpacto">
-                  {{ impacto.nombreImpacto }}
+                <option *ngFor="let impacto of impactos" [ngValue]="impacto.Id">
+                  {{ impacto.Descripcion }}
                 </option>
               </select>
             </div>

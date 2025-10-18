@@ -1,10 +1,11 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { MenuService } from '../../../core/services/menu.service';
 import { Usuario } from '../../../core/models/usuario.model';
 import { MenuItem } from '../../../core/models/menu.model';
+import { filter, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-main-layout',
@@ -13,20 +14,124 @@ import { MenuItem } from '../../../core/models/menu.model';
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss']
 })
-export class MainLayoutComponent implements OnInit {
+export class MainLayoutComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private menuService = inject(MenuService);
   private router = inject(Router);
+  private destroy$ = new Subject<void>();
   
   currentUser: Usuario | null = null;
   menuItems: MenuItem[] = [];
-  selectedMenu: string = '';
+  currentRoute: string = '';
   isLoadingMenu = true;
-  menuCollapsed = false;
+  menuCollapsed = false; // false = expandido, true = contraído
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
     this.loadMenu();
+    this.subscribeToRouteChanges();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /**
+   * Suscribe a los cambios de ruta para actualizar el menú activo
+   */
+  private subscribeToRouteChanges(): void {
+    // Detectar ruta inicial
+    this.currentRoute = this.router.url;
+    this.updateActiveMenuItems();
+
+    // Escuchar cambios de ruta
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroy$)
+    ).subscribe((event: any) => {
+      this.currentRoute = event.urlAfterRedirects || event.url;
+      this.updateActiveMenuItems();
+    });
+  }
+
+  /**
+   * Actualiza los items del menú marcando el activo y expandiendo padres
+   */
+  private updateActiveMenuItems(): void {
+    if (this.menuItems.length === 0) return;
+
+    // Limpiar estados previos
+    this.clearActiveStates(this.menuItems);
+
+    // Buscar y marcar el item activo
+    this.markActiveItem(this.menuItems);
+  }
+
+  /**
+   * Limpia el estado activo de todos los items
+   */
+  private clearActiveStates(items: MenuItem[]): void {
+    items.forEach(item => {
+      item.isActive = false;
+      if (item.subItems && item.subItems.length > 0) {
+        this.clearActiveStates(item.subItems);
+      }
+    });
+  }
+
+  /**
+   * Marca el item activo basado en la ruta actual
+   */
+  private markActiveItem(items: MenuItem[], parentItem?: MenuItem): boolean {
+    for (const item of items) {
+      const route = this.menuService.getRoute(item);
+      
+      // Verificar si es el item activo
+      if (route && this.isRouteActive(route)) {
+        item.isActive = true;
+        
+        // Expandir el padre si existe
+        if (parentItem) {
+          parentItem.expanded = true;
+        }
+        
+        return true;
+      }
+
+      // Buscar recursivamente en sub-items
+      if (item.subItems && item.subItems.length > 0) {
+        const foundInChildren = this.markActiveItem(item.subItems, item);
+        if (foundInChildren) {
+          // Si se encontró en los hijos, expandir este item
+          item.expanded = true;
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  }
+
+  /**
+   * Verifica si una ruta coincide con la ruta actual
+   */
+  private isRouteActive(route: string): boolean {
+    // Normalizar rutas (eliminar / inicial y final)
+    const normalizedRoute = route.replace(/^\/|\/$/g, '');
+    const normalizedCurrentRoute = this.currentRoute.replace(/^\/|\/$/g, '');
+
+    // Coincidencia exacta
+    if (normalizedCurrentRoute === normalizedRoute) {
+      return true;
+    }
+
+    // Verificar si la ruta actual es una sub-ruta (para rutas como /tickets/new o /tickets/123)
+    if (normalizedCurrentRoute.startsWith(normalizedRoute + '/')) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -56,6 +161,9 @@ export class MainLayoutComponent implements OnInit {
               });
             }
           });
+
+          // Actualizar el menú activo después de cargar
+          this.updateActiveMenuItems();
         }
         this.isLoadingMenu = false;
       },
@@ -116,8 +224,8 @@ export class MainLayoutComponent implements OnInit {
     const route = this.menuService.getRoute(item);
     if (route) {
       console.log('🚀 Navegando a:', route);
-      this.selectedMenu = item.Menu;
       this.router.navigate([route]);
+      // No es necesario marcar manualmente como activo, el sistema de detección automática lo hará
     }
   }
 

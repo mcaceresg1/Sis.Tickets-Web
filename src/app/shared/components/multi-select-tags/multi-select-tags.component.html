@@ -1,0 +1,57 @@
+<div class="multi-select-container" [class.disabled]="disabled">
+  <!-- Campo de selección con tags -->
+  <div class="select-field" (click)="toggleDropdown()">
+    <div class="tags-container" *ngIf="getSelectedItems().length > 0">
+      <span 
+        *ngFor="let item of getSelectedItems()" 
+        class="tag"
+        [style.background-color]="getColor(item.Id)"
+        [style.border-color]="getColor(item.Id)">
+        {{ item.Descripcion }}
+        <button 
+          type="button"
+          class="tag-remove" 
+          (click)="removeItem(item.Id, $event)"
+          [disabled]="disabled">
+          ×
+        </button>
+      </span>
+    </div>
+    <span class="placeholder" *ngIf="getSelectedItems().length === 0">
+      {{ placeholder }}
+    </span>
+    <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+      <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+    </svg>
+  </div>
+
+  <!-- Dropdown con opciones -->
+  <div class="dropdown-panel" *ngIf="mostrarDropdown">
+    <div class="dropdown-header">
+      <span>Seleccionar {{ label }}</span>
+      <button type="button" class="close-btn" (click)="cerrarDropdown()">×</button>
+    </div>
+    <div class="dropdown-content">
+      <div 
+        *ngFor="let item of items" 
+        class="dropdown-item"
+        [class.selected]="isSelected(item.Id)"
+        (click)="toggleItem(item.Id)">
+        <input 
+          type="checkbox" 
+          [checked]="isSelected(item.Id)"
+          [disabled]="disabled"
+          (click)="$event.stopPropagation()">
+        <span class="item-label">{{ item.Descripcion }}</span>
+        <span 
+          class="item-badge"
+          [style.background-color]="getColor(item.Id)">
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop para cerrar el dropdown -->
+<div class="dropdown-backdrop" *ngIf="mostrarDropdown" (click)="cerrarDropdown()"></div>
+

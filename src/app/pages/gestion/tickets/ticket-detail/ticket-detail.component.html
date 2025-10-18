@@ -18,38 +18,44 @@
         </div>
 
         <div class="detail-item">
-          <label>ID Usuario:</label>
-          <span class="value">{{ ticket.IdUsuario }}</span>
+          <label>Usuario:</label>
+          <span class="value">{{ obtenerUsuario(ticket.IdUsuario) }}</span>
         </div>
 
         <div class="detail-item">
-          <label>ID Módulo:</label>
-          <span class="value">{{ ticket.IdModulo }}</span>
+          <label>Aplicación:</label>
+          <span class="value">{{ obtenerAplicacion(ticket.IdAplicacion) }}</span>
         </div>
 
         <div class="detail-item">
-          <label>ID Aplicación:</label>
-          <span class="value">{{ ticket.IdAplicacion }}</span>
+          <label>Módulo:</label>
+          <span class="value">{{ obtenerModulo(ticket.IdModulo) }}</span>
         </div>
 
         <div class="detail-item">
-          <label>ID Tipo:</label>
-          <span class="value">{{ ticket.IdTipo }}</span>
+          <label>Tipo de Incidencia:</label>
+          <span class="value">{{ obtenerTipoIncidencia(ticket.IdTipo) }}</span>
         </div>
 
         <div class="detail-item">
-          <label>ID Prioridad:</label>
-          <span class="value">{{ ticket.IdPrioridad }}</span>
+          <label>Estado:</label>
+          <span class="value status-badge" [class]="'status-' + ticket.IdEstado">
+            {{ obtenerEstado(ticket.IdEstado) }}
+          </span>
         </div>
 
         <div class="detail-item">
-          <label>ID Estado:</label>
-          <span class="value">{{ ticket.IdEstado }}</span>
+          <label>Prioridad:</label>
+          <span class="value priority-badge" [class]="'priority-' + ticket.IdPrioridad">
+            {{ obtenerPrioridad(ticket.IdPrioridad) }}
+          </span>
         </div>
 
         <div class="detail-item">
-          <label>ID Impacto:</label>
-          <span class="value">{{ ticket.IdInpacto }}</span>
+          <label>Impacto:</label>
+          <span class="value impact-badge" [class]="'impact-' + ticket.IdInpacto">
+            {{ obtenerImpacto(ticket.IdInpacto) }}
+          </span>
         </div>
 
         <div class="detail-item">

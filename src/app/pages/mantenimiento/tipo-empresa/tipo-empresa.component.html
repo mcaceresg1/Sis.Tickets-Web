@@ -1,10 +1,130 @@
 <div class="page-container">
   <div class="page-header">
-    <h2>Gestión de Tipos de Empresa</h2>
-    <p class="subtitle">Administre los tipos de empresa</p>
+    <h1>Gestión de Tipos de Empresa</h1>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="abrirModalNuevo()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+        </svg>
+        Nuevo Tipo de Empresa
+      </button>
+    </div>
   </div>
-  
-  <div class="page-content">
-    <p>Componente en construcción...</p>
+
+  <!-- Error Message -->
+  <div class="alert alert-error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Tabla de Tipos de Empresa -->
+  <div class="page-content" *ngIf="!loading">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let tipoEmpresa of tipoEmpresas">
+            <td>{{ tipoEmpresa.IdTipo }}</td>
+            <td class="text-nowrap">{{ tipoEmpresa.sCodigo }}</td>
+            <td>{{ tipoEmpresa.sDescripcion }}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-icon btn-warning" 
+                        (click)="abrirModalEditar(tipoEmpresa)" 
+                        title="Editar tipo de empresa">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="no-data" *ngIf="tipoEmpresas.length === 0">
+        <p>No hay tipos de empresa registrados</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner-border"></div>
+    <p>Cargando tipos de empresa...</p>
+  </div>
+</div>
+
+<!-- Modal para Crear/Editar Tipo de Empresa -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ tituloModal }}</h2>
+      <button class="btn-close" (click)="cerrarModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Success Message -->
+      <div class="alert alert-success" *ngIf="successMessage">
+        {{ successMessage }}
+      </div>
+
+      <!-- Error Message -->
+      <div class="alert alert-error" *ngIf="errorModal">
+        {{ errorModal }}
+      </div>
+
+      <form [formGroup]="tipoEmpresaForm" (ngSubmit)="guardarTipoEmpresa()">
+        <div class="form-group">
+          <label for="Codigo">Código <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="Codigo" 
+            class="form-control"
+            [class.is-invalid]="campoEsInvalido('Codigo')"
+            formControlName="Codigo"
+            maxlength="50"
+            placeholder="Ej: SA, SRL, EIRL">
+          <div class="invalid-feedback" *ngIf="campoEsInvalido('Codigo')">
+            {{ obtenerMensajeError('Codigo') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="sDescripcion">Descripción <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="sDescripcion" 
+            class="form-control"
+            [class.is-invalid]="campoEsInvalido('sDescripcion')"
+            formControlName="sDescripcion"
+            maxlength="100"
+            placeholder="Ej: Sociedad Anónima, Sociedad de Responsabilidad Limitada">
+          <div class="invalid-feedback" *ngIf="campoEsInvalido('sDescripcion')">
+            {{ obtenerMensajeError('sDescripcion') }}
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModal()" [disabled]="loadingModal">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="loadingModal">
+            <span *ngIf="!loadingModal">{{ modoEdicion ? 'Actualizar' : 'Guardar' }}</span>
+            <span *ngIf="loadingModal">Guardando...</span>
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>

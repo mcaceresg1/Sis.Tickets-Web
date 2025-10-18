@@ -1,38 +1,29 @@
 <div class="main-layout">
-  <!-- ========================================== -->
-  <!-- HEADER -->
-  <!-- ========================================== -->
-  <header class="header">
-    <div class="header-left">
-      <button class="menu-toggle" (click)="toggleMenu()">
-        <i class="material-icons">menu</i>
-      </button>
-      <img 
-        src="assets/images/Logo_nexwork_ERP_WHITE.png" 
-        alt="Nexwork ERP" 
-        class="header-logo" 
-        (click)="navigateToDashboard()"
-        title="Ir al Dashboard">
-    </div>
-    
-    <div class="header-right">
-      <div class="user-info">
-        <i class="material-icons">account_circle</i>
-        <span class="user-name">{{ currentUser?.nombre }} {{ currentUser?.apellidoPaterno }}</span>
-        <span class="user-role">{{ currentUser?.perfil }}</span>
-      </div>
-      <button class="btn-logout" (click)="logout()" title="Cerrar Sesión">
-        <i class="material-icons">logout</i>
-        <span>Cerrar Sesión</span>
-      </button>
-    </div>
-  </header>
-
   <div class="layout-body">
     <!-- ========================================== -->
     <!-- MENU LATERAL -->
     <!-- ========================================== -->
     <aside class="sidebar" [class.collapsed]="menuCollapsed">
+      <!-- Logo del sidebar -->
+      <div class="sidebar-logo" *ngIf="!menuCollapsed">
+        <img 
+          src="assets/images/Logo_nexwork_ERP_WHITE.png" 
+          alt="Nexwork ERP" 
+          class="logo-image"
+          (click)="navigateToDashboard()"
+          title="Ir al Dashboard">
+      </div>
+      
+      <!-- Logo contraído (solo ícono) -->
+      <div class="sidebar-logo-collapsed" *ngIf="menuCollapsed">
+        <img 
+          src="assets/images/Logo_nexwork_ERP_WHITE.png" 
+          alt="Nexwork ERP" 
+          class="logo-image-collapsed"
+          (click)="navigateToDashboard()"
+          title="Ir al Dashboard">
+      </div>
+
       <nav class="sidebar-nav">
         <!-- Menú dinámico -->
         <div *ngIf="isLoadingMenu" class="menu-loading">
@@ -52,7 +43,7 @@
               [class.menu-header]="isHeader(item)"
               [class.has-submenu]="item.subItems && item.subItems.length > 0"
               [class.expanded]="item.expanded"
-              [class.active]="selectedMenu === item.Menu"
+              [class.active]="item.isActive"
               [style.padding-left.px]="level > 0 ? 24 + (level * 16) : null">
             
             <div class="menu-item-content" (click)="navigateToMenuItem(item, $event)">
@@ -85,10 +76,38 @@
     </aside>
 
     <!-- ========================================== -->
-    <!-- CONTENT - Aquí se cargan las páginas -->
+    <!-- CONTENT AREA (Header + Pages) -->
     <!-- ========================================== -->
-    <main class="content">
-      <router-outlet></router-outlet>
-    </main>
+    <div class="content-area">
+      <!-- ========================================== -->
+      <!-- HEADER -->
+      <!-- ========================================== -->
+      <header class="header">
+        <div class="header-left">
+          <button class="menu-toggle" (click)="toggleMenu()">
+            <i class="material-icons">menu</i>
+          </button>
+        </div>
+        
+        <div class="header-right">
+          <div class="user-info">
+            <i class="material-icons">account_circle</i>
+            <span class="user-name">{{ currentUser?.nombre }} {{ currentUser?.apellidoPaterno }}</span>
+            <span class="user-role">{{ currentUser?.perfil }}</span>
+          </div>
+          <button class="btn-logout" (click)="logout()" title="Cerrar Sesión">
+            <i class="material-icons">logout</i>
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- ========================================== -->
+      <!-- CONTENT - Aquí se cargan las páginas -->
+      <!-- ========================================== -->
+      <main class="content">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
   </div>
 </div>

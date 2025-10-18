@@ -1,10 +1,611 @@
 <div class="page-container">
   <div class="page-header">
-    <h2>Gestión de Usuarios</h2>
-    <p class="subtitle">Administre los usuarios del sistema</p>
+    <h1>Gestión de Usuarios</h1>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="abrirModalNuevo()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+        </svg>
+        Nuevo Usuario
+      </button>
+    </div>
   </div>
-  
-  <div class="page-content">
-    <p>Componente en construcción...</p>
+
+  <!-- Error Message -->
+  <div class="alert alert-error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Tabla de Usuarios -->
+  <div class="page-content" *ngIf="!loading">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Nombres</th>
+            <th>Perfil</th>
+            <th>Empresa</th>
+            <th>Aplicaciones / Módulos</th>
+            <th>Email</th>
+            <th>Cargo</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let usuario of usuarios">
+            <td>{{ usuario.iID_Usuario }}</td>
+            <td class="text-nowrap">{{ usuario.sUsuario }}</td>
+            <td>{{ usuario.Nombres }}</td>
+            <td>{{ usuario.Perfil }}</td>
+            <td>{{ usuario.sRazonSocialE }}</td>
+            <td>
+              <div class="access-tags">
+                <div class="access-section" *ngIf="usuario.IdAplicacion">
+                  <span class="access-label">Apps:</span>
+                  <span class="access-tag" 
+                        *ngFor="let app of obtenerAplicaciones(usuario.IdAplicacion)"
+                        [style.background-color]="obtenerColorAplicacion(app.id)">
+                    {{ app.nombre }}
+                  </span>
+                </div>
+                <div class="access-section" *ngIf="usuario.IdModulo">
+                  <span class="access-label">Mods:</span>
+                  <span class="access-tag-small" 
+                        *ngFor="let mod of obtenerModulos(usuario.IdModulo)"
+                        [style.background-color]="obtenerColorModulo(mod.id)">
+                    {{ mod.nombre }}
+                  </span>
+                </div>
+                <span class="text-muted" *ngIf="!usuario.IdAplicacion && !usuario.IdModulo">
+                  Sin asignar
+                </span>
+              </div>
+            </td>
+            <td>{{ usuario.sCorreoElectronico }}</td>
+            <td>{{ usuario.scargo }}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-icon btn-warning" 
+                        (click)="abrirModalEditar(usuario)" 
+                        title="Editar usuario">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="no-data" *ngIf="usuarios.length === 0">
+        <p>No hay usuarios registrados</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner-border"></div>
+    <p>Cargando usuarios...</p>
+  </div>
+</div>
+
+<!-- Modal para Crear/Editar Usuario -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ tituloModal }}</h2>
+      <button class="btn-close" (click)="cerrarModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Success Message -->
+      <div class="alert alert-success" *ngIf="successMessage">
+        {{ successMessage }}
+      </div>
+
+      <!-- Error Message -->
+      <div class="alert alert-error" *ngIf="errorModal">
+        {{ errorModal }}
+      </div>
+
+      <!-- Tabs de Navegación -->
+      <div class="tabs-container">
+        <div class="tabs-nav">
+          <button 
+            class="tab-btn" 
+            [class.active]="tabActiva === 0" 
+            (click)="cambiarTab(0)">
+            1. Acceso
+          </button>
+          <button 
+            class="tab-btn" 
+            [class.active]="tabActiva === 1" 
+            (click)="cambiarTab(1)">
+            2. Datos Personales
+          </button>
+          <button 
+            class="tab-btn" 
+            [class.active]="tabActiva === 2" 
+            (click)="cambiarTab(2)">
+            3. Permisos
+          </button>
+          <button 
+            class="tab-btn" 
+            [class.active]="tabActiva === 3" 
+            (click)="cambiarTab(3)">
+            4. Contacto
+          </button>
+          <button 
+            class="tab-btn" 
+            [class.active]="tabActiva === 4" 
+            (click)="cambiarTab(4)">
+            5. Workgroups
+          </button>
+          <button 
+            class="tab-btn" 
+            [class.active]="tabActiva === 5" 
+            (click)="cambiarTab(5)">
+            6. Configuración
+          </button>
+        </div>
+
+        <form [formGroup]="usuarioForm" (ngSubmit)="guardarUsuario()">
+          <!-- Tab 1: Datos de Acceso -->
+          <div class="tab-content" *ngIf="tabActiva === 0">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sUsuario">Usuario <span class="required" *ngIf="!modoEdicion">*</span></label>
+                <input 
+                  type="text" 
+                  id="sUsuario" 
+                  class="form-control"
+                  [class.is-invalid]="campoEsInvalido('sUsuario')"
+                  formControlName="sUsuario"
+                  maxlength="50"
+                  placeholder="Ej: jperez"
+                  autocomplete="off">
+                <div class="invalid-feedback" *ngIf="campoEsInvalido('sUsuario')">
+                  {{ obtenerMensajeError('sUsuario') }}
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="sClave">Contraseña <span class="required" *ngIf="!modoEdicion">*</span></label>
+                <input 
+                  type="password" 
+                  id="sClave" 
+                  class="form-control"
+                  [class.is-invalid]="campoEsInvalido('sClave')"
+                  formControlName="sClave"
+                  maxlength="100"
+                  placeholder="Ingrese contraseña"
+                  autocomplete="new-password">
+                <div class="invalid-feedback" *ngIf="campoEsInvalido('sClave')">
+                  {{ obtenerMensajeError('sClave') }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Datos Personales -->
+          <div class="tab-content" *ngIf="tabActiva === 1">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sNombre">Nombres <span class="required">*</span></label>
+                <input 
+                  type="text" 
+                  id="sNombre" 
+                  class="form-control"
+                  [class.is-invalid]="campoEsInvalido('sNombre')"
+                  formControlName="sNombre"
+                  maxlength="100"
+                  placeholder="Ej: Juan Carlos">
+                <div class="invalid-feedback" *ngIf="campoEsInvalido('sNombre')">
+                  {{ obtenerMensajeError('sNombre') }}
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="ApePaterno">Apellido Paterno <span class="required">*</span></label>
+                <input 
+                  type="text" 
+                  id="ApePaterno" 
+                  class="form-control"
+                  [class.is-invalid]="campoEsInvalido('ApePaterno')"
+                  formControlName="ApePaterno"
+                  maxlength="100"
+                  placeholder="Ej: Pérez">
+                <div class="invalid-feedback" *ngIf="campoEsInvalido('ApePaterno')">
+                  {{ obtenerMensajeError('ApePaterno') }}
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="ApeMaterno">Apellido Materno</label>
+                <input 
+                  type="text" 
+                  id="ApeMaterno" 
+                  class="form-control"
+                  formControlName="ApeMaterno"
+                  maxlength="100"
+                  placeholder="Ej: García">
+              </div>
+
+              <div class="form-group">
+                <label for="IdDocumento">Tipo de Documento <span class="required">*</span></label>
+                <select 
+                  id="IdDocumento" 
+                  class="form-control"
+                  [class.is-invalid]="campoEsInvalido('IdDocumento')"
+                  formControlName="IdDocumento">
+                  <option [ngValue]="null">Seleccione un tipo</option>
+                  <option *ngFor="let tipo of tiposDocumento" [ngValue]="tipo.Id">
+                    {{ tipo.Descripcion }}
+                  </option>
+                </select>
+                <div class="invalid-feedback" *ngIf="campoEsInvalido('IdDocumento')">
+                  {{ obtenerMensajeError('IdDocumento') }}
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sNumero">Número de Documento <span class="required">*</span></label>
+                <input 
+                  type="text" 
+                  id="sNumero" 
+                  class="form-control"
+                  [class.is-invalid]="campoEsInvalido('sNumero')"
+                  formControlName="sNumero"
+                  maxlength="50"
+                  placeholder="Ej: 12345678">
+                <div class="invalid-feedback" *ngIf="campoEsInvalido('sNumero')">
+                  {{ obtenerMensajeError('sNumero') }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 3: Permisos y Asignación -->
+          <div class="tab-content" *ngIf="tabActiva === 2">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="IdPerfil">Perfil <span class="required">*</span></label>
+                <select 
+                  id="IdPerfil" 
+                  class="form-control"
+                  [class.is-invalid]="campoEsInvalido('IdPerfil')"
+                  formControlName="IdPerfil">
+                  <option [value]="null" disabled>Seleccione perfil</option>
+                  <option *ngFor="let perfil of perfiles" [value]="perfil.IdPerfil">{{ perfil.Perfil }}</option>
+                </select>
+                <div class="invalid-feedback" *ngIf="campoEsInvalido('IdPerfil')">
+                  {{ obtenerMensajeError('IdPerfil') }}
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="IdEmpresa">Empresa <span class="required">*</span></label>
+                <select 
+                  id="IdEmpresa" 
+                  class="form-control"
+                  [class.is-invalid]="campoEsInvalido('IdEmpresa')"
+                  formControlName="IdEmpresa">
+                  <option [ngValue]="null">Seleccione empresa</option>
+                  <option *ngFor="let empresa of empresas" [ngValue]="empresa.Id">
+                    {{ empresa.Descripcion }}
+                  </option>
+                </select>
+                <div class="invalid-feedback" *ngIf="campoEsInvalido('IdEmpresa')">
+                  {{ obtenerMensajeError('IdEmpresa') }}
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="IdSucursal">Sucursal <span class="required">*</span></label>
+                <select 
+                  id="IdSucursal" 
+                  class="form-control"
+                  [class.is-invalid]="campoEsInvalido('IdSucursal')"
+                  formControlName="IdSucursal">
+                  <option [ngValue]="null">Seleccione sucursal</option>
+                  <option *ngFor="let sucursal of sucursales" [ngValue]="sucursal.Id">
+                    {{ sucursal.Descripcion }}
+                  </option>
+                </select>
+                <div class="invalid-feedback" *ngIf="campoEsInvalido('IdSucursal')">
+                  {{ obtenerMensajeError('IdSucursal') }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 4: Datos de Contacto -->
+          <div class="tab-content" *ngIf="tabActiva === 3">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="Correo">Correo Electrónico</label>
+                <input 
+                  type="email" 
+                  id="Correo" 
+                  class="form-control"
+                  [class.is-invalid]="campoEsInvalido('Correo')"
+                  formControlName="Correo"
+                  maxlength="200"
+                  placeholder="usuario@empresa.com">
+                <div class="invalid-feedback" *ngIf="campoEsInvalido('Correo')">
+                  {{ obtenerMensajeError('Correo') }}
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="sTelefono">Teléfono</label>
+                <input 
+                  type="text" 
+                  id="sTelefono" 
+                  class="form-control"
+                  formControlName="sTelefono"
+                  maxlength="20"
+                  placeholder="999-999-999">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sDireccion">Dirección</label>
+                <textarea 
+                  id="sDireccion" 
+                  class="form-control"
+                  formControlName="sDireccion"
+                  maxlength="500"
+                  rows="3"
+                  placeholder="Dirección completa"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="sCargo">Cargo</label>
+                <input 
+                  type="text" 
+                  id="sCargo" 
+                  class="form-control"
+                  formControlName="sCargo"
+                  maxlength="30"
+                  placeholder="Ej: Gerente, Analista">
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 5: Workgroups -->
+          <div class="tab-content" *ngIf="tabActiva === 4">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="workgroup1">Workgroup 1</label>
+                <input 
+                  type="text" 
+                  id="workgroup1" 
+                  class="form-control"
+                  formControlName="workgroup1"
+                  maxlength="30"
+                  placeholder="Grupo de trabajo 1">
+              </div>
+
+              <div class="form-group">
+                <label for="workgroup2">Workgroup 2</label>
+                <input 
+                  type="text" 
+                  id="workgroup2" 
+                  class="form-control"
+                  formControlName="workgroup2"
+                  maxlength="30"
+                  placeholder="Grupo de trabajo 2">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="workgroup3">Workgroup 3</label>
+                <input 
+                  type="text" 
+                  id="workgroup3" 
+                  class="form-control"
+                  formControlName="workgroup3"
+                  maxlength="30"
+                  placeholder="Grupo de trabajo 3">
+              </div>
+
+              <div class="form-group">
+                <label for="workgroup4">Workgroup 4</label>
+                <input 
+                  type="text" 
+                  id="workgroup4" 
+                  class="form-control"
+                  formControlName="workgroup4"
+                  maxlength="30"
+                  placeholder="Grupo de trabajo 4">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="workgroup5">Workgroup 5</label>
+                <input 
+                  type="text" 
+                  id="workgroup5" 
+                  class="form-control"
+                  formControlName="workgroup5"
+                  maxlength="30"
+                  placeholder="Grupo de trabajo 5">
+              </div>
+
+              <div class="form-group">
+                <label for="workgroup6">Workgroup 6</label>
+                <input 
+                  type="text" 
+                  id="workgroup6" 
+                  class="form-control"
+                  formControlName="workgroup6"
+                  maxlength="30"
+                  placeholder="Grupo de trabajo 6">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="workgroup7">Workgroup 7</label>
+                <input 
+                  type="text" 
+                  id="workgroup7" 
+                  class="form-control"
+                  formControlName="workgroup7"
+                  maxlength="30"
+                  placeholder="Grupo de trabajo 7">
+              </div>
+
+              <div class="form-group">
+                <label for="workgroup8">Workgroup 8</label>
+                <input 
+                  type="text" 
+                  id="workgroup8" 
+                  class="form-control"
+                  formControlName="workgroup8"
+                  maxlength="30"
+                  placeholder="Grupo de trabajo 8">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="workgroup9">Workgroup 9</label>
+                <input 
+                  type="text" 
+                  id="workgroup9" 
+                  class="form-control"
+                  formControlName="workgroup9"
+                  maxlength="30"
+                  placeholder="Grupo de trabajo 9">
+              </div>
+
+              <div class="form-group">
+                <label for="workgroup10">Workgroup 10</label>
+                <input 
+                  type="text" 
+                  id="workgroup10" 
+                  class="form-control"
+                  formControlName="workgroup10"
+                  maxlength="30"
+                  placeholder="Grupo de trabajo 10">
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Tab 6: Configuración Adicional -->
+          <div class="tab-content" *ngIf="tabActiva === 5">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sImagen">Imagen/Avatar</label>
+                <input 
+                  type="text" 
+                  id="sImagen" 
+                  class="form-control"
+                  formControlName="sImagen"
+                  maxlength="100"
+                  placeholder="Ej: 20221011195157admin.jpg">
+              </div>
+
+              <div class="form-group">
+                <label>Aplicaciones</label>
+                <app-multi-select-tags
+                  [items]="aplicaciones"
+                  [placeholder]="'Seleccione aplicaciones'"
+                  [label]="'Aplicaciones'"
+                  [colorMap]="coloresAplicaciones"
+                  formControlName="IdAplicacion">
+                </app-multi-select-tags>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Módulos</label>
+                <app-multi-select-tags
+                  [items]="modulos"
+                  [placeholder]="'Seleccione módulos'"
+                  [label]="'Módulos'"
+                  [colorMap]="coloresModulos"
+                  formControlName="IdModulo">
+                </app-multi-select-tags>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sImpacto">Impacto</label>
+                <select 
+                  id="sImpacto" 
+                  class="form-control"
+                  formControlName="sImpacto">
+                  <option [ngValue]="null">Seleccione impacto</option>
+                  <option *ngFor="let impacto of impactos" [ngValue]="impacto.Id">
+                    {{ impacto.Descripcion }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="sPrioridad">Prioridad</label>
+                <select 
+                  id="sPrioridad" 
+                  class="form-control"
+                  formControlName="sPrioridad">
+                  <option [ngValue]="null">Seleccione prioridad</option>
+                  <option *ngFor="let prioridad of prioridades" [ngValue]="prioridad.Id">
+                    {{ prioridad.Descripcion }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sEstadoC">Estado</label>
+                <select 
+                  id="sEstadoC" 
+                  class="form-control"
+                  formControlName="sEstadoC">
+                  <option [ngValue]="null">Seleccione estado</option>
+                  <option *ngFor="let estado of estados" [ngValue]="estado.Id">
+                    {{ estado.Descripcion }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal()" [disabled]="loadingModal">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="loadingModal">
+              <span *ngIf="!loadingModal">{{ modoEdicion ? 'Actualizar' : 'Guardar' }}</span>
+              <span *ngIf="loadingModal">Guardando...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </div>

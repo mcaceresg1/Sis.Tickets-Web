@@ -1,9 +1,10 @@
 import { Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { TicketService } from '../../../../core/services/ticket.service';
-import { CatalogoService } from '../../../../core/services/catalogo.service';
-import { Aplicacion, Modulo, Estado, Prioridad, Impacto } from '../../../../core/models/catalogo.model';
+import { ComboService } from '../../../../core/services/combo.service';
+import { ComboItem } from '../../../../core/models/combo.model';
 import { TicketDetail, TicketUpdateRequest } from '../../../../core/models/ticket.model';
 
 @Component({
@@ -16,7 +17,7 @@ import { TicketDetail, TicketUpdateRequest } from '../../../../core/models/ticke
 export class TicketUpdateComponent implements OnInit {
   private fb = inject(FormBuilder);
   private ticketService = inject(TicketService);
-  private catalogoService = inject(CatalogoService);
+  private comboService = inject(ComboService);
 
   @Output() ticketActualizado = new EventEmitter<void>();
 
@@ -30,18 +31,19 @@ export class TicketUpdateComponent implements OnInit {
   ticketId: number = 0;
   ticketActual: TicketDetail | null = null;
 
-  // Catálogos
-  aplicaciones: Aplicacion[] = [];
-  modulos: Modulo[] = [];
-  estados: Estado[] = [];
-  prioridades: Prioridad[] = [];
-  impactos: Impacto[] = [];
-
-  // ID de empresa fijo (ajusta según tu lógica de negocio)
-  private readonly idEmpresa = 1;
+  // Combos
+  aplicaciones: ComboItem[] = [];
+  modulos: ComboItem[] = [];
+  modulosCompletos: any[] = [];  // ✅ NUEVO: TODOS los módulos con IdAplicacion
+  tiposIncidencia: ComboItem[] = [];
+  estados: ComboItem[] = [];
+  prioridades: ComboItem[] = [];
+  impactos: ComboItem[] = [];
 
   ngOnInit(): void {
     this.inicializarFormulario();
+    this.configurarAutoSeleccionAplicacion();  // ✅ NUEVO
+    this.cargarTodosModulosConAplicacion();    // ✅ NUEVO
   }
 
   inicializarFormulario(): void {
@@ -57,48 +59,6 @@ export class TicketUpdateComponent implements OnInit {
     });
   }
 
-  cargarCatalogos(): void {
-    // Cargar aplicaciones
-    this.catalogoService.listarAplicaciones().subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.aplicaciones = response.data;
-        }
-      },
-      error: (error) => console.error('Error al cargar aplicaciones:', error)
-    });
-
-    // Cargar estados
-    this.catalogoService.listarEstados(this.idEmpresa).subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.estados = response.data;
-        }
-      },
-      error: (error) => console.error('Error al cargar estados:', error)
-    });
-
-    // Cargar prioridades
-    this.catalogoService.listarPrioridades(this.idEmpresa).subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.prioridades = response.data;
-        }
-      },
-      error: (error) => console.error('Error al cargar prioridades:', error)
-    });
-
-    // Cargar impactos
-    this.catalogoService.listarImpactos(this.idEmpresa).subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.impactos = response.data;
-        }
-      },
-      error: (error) => console.error('Error al cargar impactos:', error)
-    });
-  }
-
   onAplicacionChange(idAplicacion: number): void {
     // Limpiar módulo seleccionado solo si es un cambio manual
     if (!this.loadingTicket) {
@@ -107,13 +67,23 @@ export class TicketUpdateComponent implements OnInit {
     this.modulos = [];
 
     if (idAplicacion) {
-      this.catalogoService.listarModulos(idAplicacion).subscribe({
-        next: (response) => {
-          if (response.success && response.data) {
-            this.modulos = response.data;
+      // Cargar módulos filtrados por aplicación
+      this.comboService.getModulosPorAplicacion(idAplicacion).subscribe({
+        next: (data) => {
+          this.modulos = data;
+          console.log(`✅ Módulos cargados para aplicación ${idAplicacion} (edición):`, data);
+          
+          // Si estamos cargando el ticket, re-setear el módulo después de cargar la lista
+          if (this.loadingTicket && this.ticketActual?.IdModulo) {
+            setTimeout(() => {
+              this.ticketForm.patchValue({ idModulo: this.ticketActual?.IdModulo });
+            }, 100);
           }
         },
-        error: (error) => console.error('Error al cargar módulos:', error)
+        error: (error) => {
+          console.error('❌ Error al cargar módulos:', error);
+          this.errorMessage = 'Error al cargar módulos';
+        }
       });
     }
   }
@@ -124,46 +94,67 @@ export class TicketUpdateComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
     this.ticketForm.reset();
-    
-    // Cargar catálogos
-    this.cargarCatalogos();
-    
-    // Cargar datos del ticket
-    this.cargarTicket(ticketId);
-  }
-
-  cargarTicket(id: number): void {
     this.loadingTicket = true;
     
-    this.ticketService.obtenerTicket(id).subscribe({
-      next: (ticket) => {
-        this.loadingTicket = false;
-        this.ticketActual = ticket;
-        
+    // Cargar ticket y catálogos en paralelo
+    forkJoin({
+      ticket: this.ticketService.obtenerTicket(ticketId),
+      aplicaciones: this.comboService.getAplicaciones(),
+      tiposIncidencia: this.comboService.getTiposIncidencia(),
+      estados: this.comboService.getEstados(),
+      prioridades: this.comboService.getPrioridades(),
+      impactos: this.comboService.getNivelesUrgencia()
+    }).subscribe({
+      next: (resultado) => {
+        // Guardar los datos de los combos
+        this.aplicaciones = resultado.aplicaciones;
+        this.tiposIncidencia = resultado.tiposIncidencia;
+        this.estados = resultado.estados;
+        this.prioridades = resultado.prioridades;
+        this.impactos = resultado.impactos;
+        this.ticketActual = resultado.ticket;
+
+        console.log('📝 Ticket cargado para edición:', resultado.ticket);
+        console.log('📋 Catálogos cargados');
+
         // Llenar el formulario con los datos del ticket
         this.ticketForm.patchValue({
-          codigo: ticket.sCodigo || '',
-          descripcion: ticket.sDescripcion || '',
-          idAplicacion: ticket.IdAplicacion || null,
-          idModulo: ticket.IdModulo || null,
-          idTipo: ticket.IdTipo || null,
-          idEstado: ticket.IdEstado || null,
-          idPrioridad: ticket.IdPrioridad || null,
-          idImpacto: ticket.IdInpacto || null
+          codigo: resultado.ticket.sCodigo || '',
+          descripcion: resultado.ticket.sDescripcion || '',
+          idAplicacion: resultado.ticket.IdAplicacion || null,
+          idTipo: resultado.ticket.IdTipo || null,
+          idEstado: resultado.ticket.IdEstado || null,
+          idPrioridad: resultado.ticket.IdPrioridad || null,
+          idImpacto: resultado.ticket.IdInpacto || null
         });
 
+        console.log('✅ Formulario pre-llenado con valores:', this.ticketForm.value);
+
         // Cargar módulos si hay aplicación seleccionada
-        if (ticket.IdAplicacion) {
-          this.onAplicacionChange(ticket.IdAplicacion);
-          // Después de cargar módulos, volver a setear el módulo seleccionado
-          setTimeout(() => {
-            this.ticketForm.patchValue({ idModulo: ticket.IdModulo || null });
-          }, 800);
+        if (resultado.ticket.IdAplicacion) {
+          this.comboService.getModulosPorAplicacion(resultado.ticket.IdAplicacion).subscribe({
+            next: (modulos) => {
+              this.modulos = modulos;
+              console.log(`✅ Módulos cargados para aplicación ${resultado.ticket.IdAplicacion}:`, modulos);
+              
+              // Setear el módulo del ticket
+              this.ticketForm.patchValue({ idModulo: resultado.ticket.IdModulo || null });
+              console.log(`✅ Módulo seleccionado: ${resultado.ticket.IdModulo}`);
+              
+              this.loadingTicket = false;
+            },
+            error: (error) => {
+              console.error('❌ Error al cargar módulos:', error);
+              this.loadingTicket = false;
+            }
+          });
+        } else {
+          this.loadingTicket = false;
         }
       },
       error: (error) => {
         this.loadingTicket = false;
-        this.errorMessage = 'Error al cargar el ticket';
+        this.errorMessage = 'Error al cargar los datos del ticket';
         console.error('Error:', error);
       }
     });
@@ -223,6 +214,45 @@ export class TicketUpdateComponent implements OnInit {
   private marcarCamposComoTocados(): void {
     Object.keys(this.ticketForm.controls).forEach(key => {
       this.ticketForm.get(key)?.markAsTouched();
+    });
+  }
+
+  /**
+   * ✅ NUEVO: Configurar auto-selección de aplicación al seleccionar módulo
+   */
+  private configurarAutoSeleccionAplicacion(): void {
+    this.ticketForm.get('idModulo')?.valueChanges.subscribe((idModulo: number) => {
+      if (idModulo && this.modulosCompletos.length > 0) {
+        const modulo = this.modulosCompletos.find(m => m.IdModulo === idModulo);
+        if (modulo && modulo.Idaplicacion) {
+          const idAplicacionActual = this.ticketForm.get('idAplicacion')?.value;
+          
+          // Solo cambiar si es diferente para evitar loops
+          if (idAplicacionActual !== modulo.Idaplicacion) {
+            this.ticketForm.patchValue({ idAplicacion: modulo.Idaplicacion }, { emitEvent: false });
+            console.log(`🎯 Aplicación auto-seleccionada: ${modulo.Idaplicacion} para módulo ${idModulo}`);
+            
+            // Recargar módulos de la aplicación seleccionada
+            this.onAplicacionChange(modulo.Idaplicacion);
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * ✅ NUEVO: Cargar todos los módulos con su IdAplicacion
+   */
+  private cargarTodosModulosConAplicacion(): void {
+    this.comboService.getAllModulos().subscribe({
+      next: (data: any) => {
+        // Guardar módulos completos con IdAplicacion
+        this.modulosCompletos = data;
+        console.log('✅ Módulos completos cargados con aplicaciones:', data.length);
+      },
+      error: (error) => {
+        console.error('❌ Error al cargar módulos completos:', error);
+      }
     });
   }
 

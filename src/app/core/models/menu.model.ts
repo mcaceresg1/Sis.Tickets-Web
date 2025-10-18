@@ -8,6 +8,7 @@ export interface MenuItem {
   sIcono: string | null;
   subItems?: MenuItem[]; // Para construir la jerarquía
   expanded?: boolean; // Para manejar el estado de expansión
+  isActive?: boolean; // Para marcar el item activo basado en la ruta actual
 }
 
 export interface MenuResponse {
