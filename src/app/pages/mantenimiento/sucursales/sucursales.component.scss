@@ -87,32 +87,6 @@
   }
 }
 
-.filter-section {
-  background: white;
-  padding: 16px 24px;
-  border-radius: 8px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-
-  .form-group-inline {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    label {
-      font-weight: 500;
-      color: #333;
-      margin: 0;
-      min-width: 80px;
-    }
-
-    select {
-      flex: 1;
-      max-width: 400px;
-    }
-  }
-}
-
 .page-content {
   background: white;
   border-radius: 8px;

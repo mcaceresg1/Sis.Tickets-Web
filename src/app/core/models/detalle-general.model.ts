@@ -7,9 +7,6 @@ export interface DetalleGeneral {
   IdCabecera: number;
   nCodIte: number;
   vTe1Gen: string;
-  vTe2Gen?: string;
-  vAl1Gen?: string;
-  vAl2Gen?: string;
   UserReg?: string;
   dFechaReg?: Date;
   UserMod?: string;
@@ -24,9 +21,6 @@ export interface DetalleGeneralCreateRequest {
   IdCabecera: number;
   nCodIte: number;
   vTe1Gen: string;
-  vTe2Gen?: string;
-  vAl1Gen?: string;
-  vAl2Gen?: string;
   Usuario?: string;
 }
 
@@ -37,9 +31,6 @@ export interface DetalleGeneralUpdateRequest {
   IdCabecera: number;
   nCodIte: number;
   vTe1Gen: string;
-  vTe2Gen?: string;
-  vAl1Gen?: string;
-  vAl2Gen?: string;
   Usuario?: string;
 }
 

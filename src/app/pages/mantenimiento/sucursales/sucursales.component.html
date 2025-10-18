@@ -16,21 +16,6 @@
     {{ errorMessage }}
   </div>
 
-  <!-- Filtro por Empresa -->
-  <div class="filter-section" *ngIf="empresas.length > 0">
-    <div class="form-group-inline">
-      <label for="empresaFilter">Empresa:</label>
-      <select id="empresaFilter" 
-              class="form-control"
-              [(ngModel)]="idEmpresaSeleccionada"
-              (change)="onEmpresaChange(idEmpresaSeleccionada)">
-        <option *ngFor="let empresa of empresas" [value]="empresa.id">
-          {{ empresa.nombre }}
-        </option>
-      </select>
-    </div>
-  </div>
-
   <!-- Tabla de Sucursales -->
   <div class="page-content" *ngIf="!loading">
     <div class="table-responsive">
@@ -132,66 +117,74 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="IdEmpresa">Empresa <span class="required">*</span></label>
-            <select 
-              id="IdEmpresa" 
-              class="form-control"
-              [class.is-invalid]="campoEsInvalido('IdEmpresa')"
-              formControlName="IdEmpresa">
-              <option value="">Seleccione...</option>
-              <option *ngFor="let empresa of empresas" [value]="empresa.id">
-                {{ empresa.nombre }}
-              </option>
-            </select>
-            <div class="invalid-feedback" *ngIf="campoEsInvalido('IdEmpresa')">
-              {{ obtenerMensajeError('IdEmpresa') }}
-            </div>
-          </div>
+           <div class="form-group">
+             <label for="IdEmpresa">Empresa <span class="required">*</span></label>
+             <select 
+               id="IdEmpresa" 
+               class="form-control"
+               [class.is-invalid]="campoEsInvalido('IdEmpresa')"
+               formControlName="IdEmpresa">
+               <option [ngValue]="null" disabled selected>Seleccione...</option>
+               <option *ngFor="let empresa of empresas" [ngValue]="empresa.Id">
+                 {{ empresa.Descripcion }}
+               </option>
+             </select>
+             <div class="invalid-feedback" *ngIf="campoEsInvalido('IdEmpresa')">
+               {{ obtenerMensajeError('IdEmpresa') }}
+             </div>
+           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label for="IdPais">País <span class="required">*</span></label>
-            <input 
-              type="text" 
-              id="IdPais" 
-              class="form-control"
-              [class.is-invalid]="campoEsInvalido('IdPais')"
-              formControlName="IdPais"
-              maxlength="10"
-              placeholder="Ej: 01">
-            <div class="invalid-feedback" *ngIf="campoEsInvalido('IdPais')">
-              {{ obtenerMensajeError('IdPais') }}
-            </div>
-          </div>
-
-          <div class="form-group">
             <label for="TipoEmpresa">Tipo Empresa <span class="required">*</span></label>
-            <input 
-              type="number" 
+            <select 
               id="TipoEmpresa" 
               class="form-control"
               [class.is-invalid]="campoEsInvalido('TipoEmpresa')"
-              formControlName="TipoEmpresa"
-              placeholder="Ej: 1">
+              formControlName="TipoEmpresa">
+              <option [ngValue]="null" disabled selected>Seleccione...</option>
+              <option *ngFor="let tipo of tiposEmpresa" [ngValue]="tipo.Id">
+                {{ tipo.Descripcion }}
+              </option>
+            </select>
             <div class="invalid-feedback" *ngIf="campoEsInvalido('TipoEmpresa')">
               {{ obtenerMensajeError('TipoEmpresa') }}
             </div>
           </div>
+
+           <div class="form-group">
+             <label for="IdPais">País <span class="required">*</span></label>
+             <select 
+               id="IdPais" 
+               class="form-control"
+               [class.is-invalid]="campoEsInvalido('IdPais')"
+               formControlName="IdPais">
+               <option value="" disabled selected>Seleccione...</option>
+               <option *ngFor="let pais of paises" [value]="pais.Id">
+                 {{ pais.Descripcion }}
+               </option>
+             </select>
+             <div class="invalid-feedback" *ngIf="campoEsInvalido('IdPais')">
+               {{ obtenerMensajeError('IdPais') }}
+             </div>
+           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label for="IdDepartamento">Departamento <span class="required">*</span></label>
-            <input 
-              type="text" 
+            <select 
               id="IdDepartamento" 
               class="form-control"
               [class.is-invalid]="campoEsInvalido('IdDepartamento')"
               formControlName="IdDepartamento"
-              maxlength="2"
-              placeholder="Ej: 15">
+              [disabled]="departamentos.length === 0">
+              <option value="" disabled selected>Seleccione primero un país...</option>
+              <option *ngFor="let depto of departamentos" [value]="depto.sIdDep">
+                {{ depto.sDescUbigeo }}
+              </option>
+            </select>
             <div class="invalid-feedback" *ngIf="campoEsInvalido('IdDepartamento')">
               {{ obtenerMensajeError('IdDepartamento') }}
             </div>
@@ -199,14 +192,17 @@
 
           <div class="form-group">
             <label for="IdProvincia">Provincia <span class="required">*</span></label>
-            <input 
-              type="text" 
+            <select 
               id="IdProvincia" 
               class="form-control"
               [class.is-invalid]="campoEsInvalido('IdProvincia')"
               formControlName="IdProvincia"
-              maxlength="2"
-              placeholder="Ej: 01">
+              [disabled]="provincias.length === 0">
+              <option value="" disabled selected>Seleccione primero un departamento...</option>
+              <option *ngFor="let prov of provincias" [value]="prov.sIdProv">
+                {{ prov.sDescUbigeo }}
+              </option>
+            </select>
             <div class="invalid-feedback" *ngIf="campoEsInvalido('IdProvincia')">
               {{ obtenerMensajeError('IdProvincia') }}
             </div>
@@ -214,14 +210,17 @@
 
           <div class="form-group">
             <label for="IdDistrito">Distrito <span class="required">*</span></label>
-            <input 
-              type="text" 
+            <select 
               id="IdDistrito" 
               class="form-control"
               [class.is-invalid]="campoEsInvalido('IdDistrito')"
               formControlName="IdDistrito"
-              maxlength="2"
-              placeholder="Ej: 18">
+              [disabled]="distritos.length === 0">
+              <option value="" disabled selected>Seleccione primero una provincia...</option>
+              <option *ngFor="let dist of distritos" [value]="dist.sIdDistrito">
+                {{ dist.sDescUbigeo }}
+              </option>
+            </select>
             <div class="invalid-feedback" *ngIf="campoEsInvalido('IdDistrito')">
               {{ obtenerMensajeError('IdDistrito') }}
             </div>
