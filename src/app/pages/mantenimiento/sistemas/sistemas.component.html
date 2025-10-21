@@ -1,12 +1,12 @@
 <div class="page-container">
   <div class="page-header">
-    <h1>Gestión de Aplicaciones</h1>
+    <h1>Gestión de Sistemas</h1>
     <div class="header-actions">
       <button class="btn btn-primary" (click)="abrirModalNuevo()">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
           <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
         </svg>
-        Nueva Aplicación
+        Nuevo Sistema
       </button>
     </div>
   </div>
@@ -16,7 +16,7 @@
     {{ errorMessage }}
   </div>
 
-  <!-- Tabla de Aplicaciones -->
+  <!-- Tabla de Sistemas -->
   <div class="page-content" *ngIf="!loading">
     <div class="table-responsive">
       <table class="table">
@@ -29,15 +29,15 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let aplicacion of aplicaciones">
-            <td>{{ aplicacion.IdApli }}</td>
-            <td class="text-nowrap">{{ aplicacion.sCodigo }}</td>
-            <td>{{ aplicacion.sDescripcion }}</td>
+          <tr *ngFor="let sistema of sistemas">
+            <td>{{ sistema.IdSistema }}</td>
+            <td class="text-nowrap">{{ sistema.sCodigo }}</td>
+            <td>{{ sistema.sDescripcion }}</td>
             <td>
               <div class="action-buttons">
                 <button class="btn btn-sm btn-icon btn-warning" 
-                        (click)="abrirModalEditar(aplicacion)" 
-                        title="Editar aplicación">
+                        (click)="abrirModalEditar(sistema)" 
+                        title="Editar sistema">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
                   </svg>
@@ -48,8 +48,8 @@
         </tbody>
       </table>
       
-      <div class="no-data" *ngIf="aplicaciones.length === 0">
-        <p>No hay aplicaciones registradas para esta empresa</p>
+      <div class="no-data" *ngIf="sistemas.length === 0">
+        <p>No hay sistemas registrados</p>
       </div>
     </div>
   </div>
@@ -57,11 +57,11 @@
   <!-- Loading -->
   <div class="loading-container" *ngIf="loading">
     <div class="spinner-border"></div>
-    <p>Cargando aplicaciones...</p>
+    <p>Cargando sistemas...</p>
   </div>
 </div>
 
-<!-- Modal para Crear/Editar Aplicación -->
+<!-- Modal para Crear/Editar Sistema -->
 <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -84,7 +84,7 @@
         {{ errorModal }}
       </div>
 
-      <form [formGroup]="aplicacionForm" (ngSubmit)="guardarAplicacion()">
+      <form [formGroup]="sistemaForm" (ngSubmit)="guardarSistema()">
         <div class="form-group">
           <label for="sCodigo">Código <span class="required">*</span></label>
           <input 
@@ -94,7 +94,7 @@
             [class.is-invalid]="campoEsInvalido('sCodigo')"
             formControlName="sCodigo"
             maxlength="50"
-            placeholder="Ej: ERP, CRM, WMS">
+            placeholder="Ej: SIS001, SIS002">
           <div class="invalid-feedback" *ngIf="campoEsInvalido('sCodigo')">
             {{ obtenerMensajeError('sCodigo') }}
           </div>
@@ -109,7 +109,7 @@
             [class.is-invalid]="campoEsInvalido('sDescripcion')"
             formControlName="sDescripcion"
             maxlength="100"
-            placeholder="Ej: Sistema ERP, Sistema CRM">
+            placeholder="Ej: SISTEMA NEXWORK, SISTEMA PARQUE RECUERDO">
           <div class="invalid-feedback" *ngIf="campoEsInvalido('sDescripcion')">
             {{ obtenerMensajeError('sDescripcion') }}
           </div>

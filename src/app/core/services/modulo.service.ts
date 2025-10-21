@@ -29,15 +29,14 @@ export class ModuloService {
   /**
    * Crear un nuevo módulo
    */
-  crearModulo(modulo: ModuloCreateRequest): Observable<ModuloApiResponse> {
-    return this.http.post<ModuloApiResponse>(this.apiUrl, modulo);
+  crearModulo(moduloData: ModuloCreateRequest): Observable<ModuloApiResponse> {
+    return this.http.post<ModuloApiResponse>(this.apiUrl, moduloData);
   }
 
   /**
    * Actualizar un módulo existente
    */
-  actualizarModulo(id: number, modulo: ModuloUpdateRequest): Observable<ModuloApiResponse> {
-    return this.http.put<ModuloApiResponse>(`${this.apiUrl}/${id}`, modulo);
+  actualizarModulo(id: number, moduloData: ModuloUpdateRequest): Observable<ModuloApiResponse> {
+    return this.http.put<ModuloApiResponse>(`${this.apiUrl}/${id}`, moduloData);
   }
 }
-

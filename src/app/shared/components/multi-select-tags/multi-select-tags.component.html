@@ -1,6 +1,9 @@
+<!-- Backdrop para cerrar el dropdown (PRIMERO para que esté detrás) -->
+<div class="dropdown-backdrop" *ngIf="mostrarDropdown" (click)="cerrarDropdown()"></div>
+
 <div class="multi-select-container" [class.disabled]="disabled">
   <!-- Campo de selección con tags -->
-  <div class="select-field" (click)="toggleDropdown()">
+  <div #selectField class="select-field" (click)="toggleDropdown($event)">
     <div class="tags-container" *ngIf="getSelectedItems().length > 0">
       <span 
         *ngFor="let item of getSelectedItems()" 
@@ -26,7 +29,11 @@
   </div>
 
   <!-- Dropdown con opciones -->
-  <div class="dropdown-panel" *ngIf="mostrarDropdown">
+  <div class="dropdown-panel" 
+       *ngIf="mostrarDropdown"
+       [style.top]="dropdownPosition.top"
+       [style.left]="dropdownPosition.left"
+       [style.width]="dropdownPosition.width">
     <div class="dropdown-header">
       <span>Seleccionar {{ label }}</span>
       <button type="button" class="close-btn" (click)="cerrarDropdown()">×</button>
@@ -37,21 +44,16 @@
         class="dropdown-item"
         [class.selected]="isSelected(item.Id)"
         (click)="toggleItem(item.Id)">
-        <input 
-          type="checkbox" 
-          [checked]="isSelected(item.Id)"
-          [disabled]="disabled"
-          (click)="$event.stopPropagation()">
         <span class="item-label">{{ item.Descripcion }}</span>
         <span 
           class="item-badge"
           [style.background-color]="getColor(item.Id)">
         </span>
+        <svg *ngIf="isSelected(item.Id)" class="check-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+        </svg>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Backdrop para cerrar el dropdown -->
-<div class="dropdown-backdrop" *ngIf="mostrarDropdown" (click)="cerrarDropdown()"></div>
 

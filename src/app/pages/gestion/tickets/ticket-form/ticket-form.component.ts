@@ -27,9 +27,9 @@ export class TicketFormComponent implements OnInit {
   successMessage = '';
 
   // Combos
-  aplicaciones: ComboItem[] = [];
-  modulos: ComboItem[] = [];
-  modulosCompletos: any[] = [];  // ✅ NUEVO: TODOS los módulos con IdAplicacion
+  sistemas: ComboItem[] = [];       // ✅ Nivel 1: Sistemas
+  modulos: ComboItem[] = [];        // ✅ Nivel 2: Módulos (filtrados por sistema)
+  paginas: ComboItem[] = [];        // ✅ Nivel 3: Páginas (filtradas por módulo)
   tiposIncidencia: ComboItem[] = [];
   estados: ComboItem[] = [];
   prioridades: ComboItem[] = [];
@@ -37,17 +37,17 @@ export class TicketFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.inicializarFormulario();
-    this.configurarAutoSeleccionAplicacion();  // ✅ NUEVO
+    this.configurarFiltradoCascada();  // ✅ Configurar filtrado Sistema→Módulo→Página
     this.cargarCatalogos();
-    this.cargarTodosModulosConAplicacion();    // ✅ NUEVO
   }
 
   inicializarFormulario(): void {
     this.ticketForm = this.fb.group({
       codigo: ['', [Validators.required, Validators.maxLength(20)]],
       descripcion: ['', [Validators.required]],
-      idAplicacion: [null, [Validators.required]],
-      idModulo: [null],
+      idSistema: [null, [Validators.required]],   // ✅ Nivel 1: Sistema
+      idModulo: [null, [Validators.required]],    // ✅ Nivel 2: Módulo
+      idPagina: [null, [Validators.required]],    // ✅ Nivel 3: Página
       idTipo: [null],
       idEstado: [null],
       idPrioridad: [null],
@@ -56,15 +56,27 @@ export class TicketFormComponent implements OnInit {
   }
 
   cargarCatalogos(): void {
-    // Cargar aplicaciones (ID = 9)
-    this.comboService.getAplicaciones().subscribe({
+    // Cargar Sistemas filtrados por usuario
+    // Si es ADMIN: ve todos los sistemas
+    // Si NO es admin: ve solo su sistema (IdSistema)
+    this.comboService.getSistemasDelUsuario().subscribe({
       next: (data) => {
-        this.aplicaciones = data;
-        console.log('✅ Aplicaciones cargadas:', data);
+        this.sistemas = data;
+        console.log('✅ Sistemas cargados (filtrados por usuario):', data);
       },
       error: (error) => {
-        console.error('❌ Error al cargar aplicaciones:', error);
-        this.errorMessage = 'Error al cargar aplicaciones';
+        console.error('❌ Error al cargar sistemas:', error);
+        // Fallback: intentar cargar todos los sistemas
+        this.comboService.getComboById(20).subscribe({
+          next: (data) => {
+            this.sistemas = data;
+            console.log('⚠️ Sistemas cargados sin filtro (fallback):', data);
+          },
+          error: (err) => {
+            console.error('❌ Error en fallback:', err);
+            this.errorMessage = 'Error al cargar sistemas';
+          }
+        });
       }
     });
 
@@ -118,71 +130,49 @@ export class TicketFormComponent implements OnInit {
   }
 
   /**
-   * ✅ NUEVO: Configurar auto-selección de aplicación al seleccionar módulo
+   * ✅ Configurar filtrado en cascada: Sistema → Módulo → Página
    */
-  private configurarAutoSeleccionAplicacion(): void {
-    this.ticketForm.get('idModulo')?.valueChanges.subscribe((idModulo: number) => {
-      if (idModulo && this.modulosCompletos.length > 0) {
-        const modulo = this.modulosCompletos.find(m => m.IdModulo === idModulo);
-        if (modulo && modulo.Idaplicacion) {
-          const idAplicacionActual = this.ticketForm.get('idAplicacion')?.value;
-          
-          // Solo cambiar si es diferente para evitar loops
-          if (idAplicacionActual !== modulo.Idaplicacion) {
-            this.ticketForm.patchValue({ idAplicacion: modulo.Idaplicacion }, { emitEvent: false });
-            console.log(`🎯 Aplicación auto-seleccionada: ${modulo.Idaplicacion} para módulo ${idModulo}`);
-            
-            // Recargar módulos de la aplicación seleccionada
-            this.onAplicacionChange(modulo.Idaplicacion);
+  private configurarFiltradoCascada(): void {
+    // Cuando cambia el Sistema, cargar Módulos
+    this.ticketForm.get('idSistema')?.valueChanges.subscribe((idSistema: number | null) => {
+      console.log('🔄 Sistema cambió a:', idSistema);
+      this.modulos = [];
+      this.paginas = [];
+      this.ticketForm.patchValue({ idModulo: null, idPagina: null }, { emitEvent: false });
+
+      if (idSistema) {
+        this.comboService.getModulosPorSistema(idSistema).subscribe({
+          next: (data) => {
+            this.modulos = data;
+            console.log(`✅ Módulos cargados para sistema ${idSistema}:`, data);
+          },
+          error: (error) => {
+            console.error('❌ Error al cargar módulos:', error);
+            this.errorMessage = 'Error al cargar módulos';
           }
-        }
+        });
       }
     });
-  }
 
-  /**
-   * ✅ NUEVO: Cargar todos los módulos con su IdAplicacion
-   */
-  private cargarTodosModulosConAplicacion(): void {
-    this.comboService.getAllModulos().subscribe({
-      next: (data: any) => {
-        // Guardar módulos completos con IdAplicacion
-        // El endpoint debe retornar módulos con estructura: { IdModulo, sDescripcion, Idaplicacion }
-        this.modulosCompletos = data;
-        console.log('✅ Módulos completos cargados con aplicaciones:', data.length);
-      },
-      error: (error) => {
-        console.error('❌ Error al cargar módulos completos:', error);
+    // Cuando cambia el Módulo, cargar Páginas
+    this.ticketForm.get('idModulo')?.valueChanges.subscribe((idModulo: number | null) => {
+      console.log('🔄 Módulo cambió a:', idModulo);
+      this.paginas = [];
+      this.ticketForm.patchValue({ idPagina: null }, { emitEvent: false });
+
+      if (idModulo) {
+        this.comboService.getPaginasPorModulo(idModulo).subscribe({
+          next: (data) => {
+            this.paginas = data;
+            console.log(`✅ Páginas cargadas para módulo ${idModulo}:`, data);
+          },
+          error: (error) => {
+            console.error('❌ Error al cargar páginas:', error);
+            this.errorMessage = 'Error al cargar páginas';
+          }
+        });
       }
     });
-  }
-
-  onAplicacionChange(idAplicacion: number): void {
-    // Limpiar módulo seleccionado solo si cambia manualmente
-    const moduloActual = this.ticketForm.get('idModulo')?.value;
-    this.modulos = [];
-
-    if (idAplicacion) {
-      // Cargar módulos filtrados por aplicación
-      this.comboService.getModulosPorAplicacion(idAplicacion).subscribe({
-        next: (data) => {
-          this.modulos = data;
-          console.log(`✅ Módulos cargados para aplicación ${idAplicacion}:`, data);
-          
-          // Si el módulo actual no pertenece a esta aplicación, limpiarlo
-          if (moduloActual) {
-            const moduloValido = data.find((m: ComboItem) => m.Id === moduloActual);
-            if (!moduloValido) {
-              this.ticketForm.patchValue({ idModulo: null }, { emitEvent: false });
-            }
-          }
-        },
-        error: (error) => {
-          console.error('❌ Error al cargar módulos:', error);
-          this.errorMessage = 'Error al cargar módulos';
-        }
-      });
-    }
   }
 
   abrirModal(): void {
@@ -213,8 +203,9 @@ export class TicketFormComponent implements OnInit {
     const ticketData: TicketCreateRequest = {
       codigo: this.ticketForm.value.codigo,
       descripcion: this.ticketForm.value.descripcion,
-      idAplicacion: this.ticketForm.value.idAplicacion || null,
-      idModulo: this.ticketForm.value.idModulo || null,
+      idSistema: this.ticketForm.value.idSistema,        // ✅ NUEVO: Sistema
+      idModulo: this.ticketForm.value.idModulo,          // ✅ Módulo
+      idPagina: this.ticketForm.value.idPagina || null,  // ✅ Página
       idTipo: this.ticketForm.value.idTipo || null,
       idEstado: this.ticketForm.value.idEstado || null,
       idPrioridad: this.ticketForm.value.idPrioridad || null,

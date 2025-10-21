@@ -43,23 +43,22 @@
               <small class="form-text">Máximo 20 caracteres</small>
             </div>
 
-            <!-- Aplicación -->
+            <!-- Sistema -->
             <div class="form-group col-md-6">
-              <label for="idAplicacion">Aplicación <span class="required">*</span></label>
+              <label for="idSistema">Sistema <span class="required">*</span></label>
               <select
-                id="idAplicacion"
+                id="idSistema"
                 class="form-control"
-                formControlName="idAplicacion"
-                (change)="onAplicacionChange(ticketForm.value.idAplicacion)"
-                [class.is-invalid]="campoEsInvalido('idAplicacion')"
+                formControlName="idSistema"
+                [class.is-invalid]="campoEsInvalido('idSistema')"
               >
-                <option [ngValue]="null">Seleccione una aplicación</option>
-                <option *ngFor="let app of aplicaciones" [ngValue]="app.Id">
-                  {{ app.Descripcion }}
+                <option [ngValue]="null">Seleccione un sistema</option>
+                <option *ngFor="let sistema of sistemas" [ngValue]="sistema.Id">
+                  {{ sistema.Descripcion }}
                 </option>
               </select>
-              <div class="invalid-feedback" *ngIf="campoEsInvalido('idAplicacion')">
-                {{ obtenerMensajeError('idAplicacion') }}
+              <div class="invalid-feedback" *ngIf="campoEsInvalido('idSistema')">
+                {{ obtenerMensajeError('idSistema') }}
               </div>
             </div>
           </div>
@@ -67,21 +66,42 @@
           <div class="form-row">
             <!-- Módulo -->
             <div class="form-group col-md-6">
-              <label for="idModulo">Módulo</label>
+              <label for="idModulo">Módulo <span class="required">*</span></label>
               <select
                 id="idModulo"
                 class="form-control"
                 formControlName="idModulo"
-                [disabled]="!ticketForm.value.idAplicacion || modulos.length === 0"
+                [disabled]="!ticketForm.value.idSistema || modulos.length === 0"
+                [class.is-invalid]="campoEsInvalido('idModulo')"
               >
                 <option [ngValue]="null">Seleccione un módulo</option>
                 <option *ngFor="let modulo of modulos" [ngValue]="modulo.Id">
                   {{ modulo.Descripcion }}
                 </option>
               </select>
-              <small class="form-text" *ngIf="!ticketForm.value.idAplicacion">
-                Primero seleccione una aplicación
-              </small>
+              <div class="invalid-feedback" *ngIf="campoEsInvalido('idModulo')">
+                {{ obtenerMensajeError('idModulo') }}
+              </div>
+            </div>
+
+            <!-- Página -->
+            <div class="form-group col-md-6">
+              <label for="idPagina">Página <span class="required">*</span></label>
+              <select
+                id="idPagina"
+                class="form-control"
+                formControlName="idPagina"
+                [disabled]="!ticketForm.value.idModulo || paginas.length === 0"
+                [class.is-invalid]="campoEsInvalido('idPagina')"
+              >
+                <option [ngValue]="null">Seleccione una página</option>
+                <option *ngFor="let pagina of paginas" [ngValue]="pagina.Id">
+                  {{ pagina.Descripcion }}
+                </option>
+              </select>
+              <div class="invalid-feedback" *ngIf="campoEsInvalido('idPagina')">
+                {{ obtenerMensajeError('idPagina') }}
+              </div>
             </div>
           </div>
 

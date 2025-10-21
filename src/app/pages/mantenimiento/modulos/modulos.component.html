@@ -1,12 +1,12 @@
 <div class="page-container">
   <div class="page-header">
-    <h1>Gestión de Módulos</h1>
+    <h1>Gestión de modulos</h1>
     <div class="header-actions">
       <button class="btn btn-primary" (click)="abrirModalNuevo()">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
           <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
         </svg>
-        Nuevo Módulo
+        Nuevo Modulo
       </button>
     </div>
   </div>
@@ -16,7 +16,7 @@
     {{ errorMessage }}
   </div>
 
-  <!-- Tabla de Módulos -->
+  <!-- Tabla de modulos -->
   <div class="page-content" *ngIf="!loading">
     <div class="table-responsive">
       <table class="table">
@@ -25,7 +25,6 @@
             <th>ID</th>
             <th>Código</th>
             <th>Descripción</th>
-            <th>Aplicación</th>
             <th class="text-center">Acciones</th>
           </tr>
         </thead>
@@ -34,12 +33,11 @@
             <td>{{ modulo.IdModulo }}</td>
             <td class="text-nowrap">{{ modulo.sCodigo }}</td>
             <td>{{ modulo.sDescripcion }}</td>
-            <td>{{ modulo.Aplicacion }}</td>
             <td>
               <div class="action-buttons">
                 <button class="btn btn-sm btn-icon btn-warning" 
                         (click)="abrirModalEditar(modulo)" 
-                        title="Editar módulo">
+                        title="Editar aplicación">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
                   </svg>
@@ -51,7 +49,7 @@
       </table>
       
       <div class="no-data" *ngIf="modulos.length === 0">
-        <p>No hay módulos registrados para esta empresa</p>
+        <p>No hay modulos registradas para esta empresa</p>
       </div>
     </div>
   </div>
@@ -59,11 +57,11 @@
   <!-- Loading -->
   <div class="loading-container" *ngIf="loading">
     <div class="spinner-border"></div>
-    <p>Cargando módulos...</p>
+    <p>Cargando modulos...</p>
   </div>
 </div>
 
-<!-- Modal para Crear/Editar Módulo -->
+<!-- Modal para Crear/Editar Aplicación -->
 <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -86,7 +84,20 @@
         {{ errorModal }}
       </div>
 
-      <form [formGroup]="moduloForm" (ngSubmit)="guardarModulo()">
+      <form [formGroup]="ModuloForm" (ngSubmit)="guardarModulo()">
+        <div class="form-group">
+          <label for="IdSistema">Sistema <span class="required">*</span></label>
+          <select 
+            id="IdSistema" 
+            class="form-control"
+            formControlName="IdSistema">
+            <option [value]="null">Seleccione un sistema</option>
+            <option *ngFor="let sistema of sistemas" [value]="sistema.Id">
+              {{ sistema.Descripcion }}
+            </option>
+          </select>
+        </div>
+
         <div class="form-group">
           <label for="sCodigo">Código <span class="required">*</span></label>
           <input 
@@ -96,7 +107,7 @@
             [class.is-invalid]="campoEsInvalido('sCodigo')"
             formControlName="sCodigo"
             maxlength="50"
-            placeholder="Ej: VEN, COM, INV">
+            placeholder="Ej: ERP, CRM, WMS">
           <div class="invalid-feedback" *ngIf="campoEsInvalido('sCodigo')">
             {{ obtenerMensajeError('sCodigo') }}
           </div>
@@ -111,23 +122,9 @@
             [class.is-invalid]="campoEsInvalido('sDescripcion')"
             formControlName="sDescripcion"
             maxlength="100"
-            placeholder="Ej: Módulo de Ventas, Módulo de Compras">
+            placeholder="Ej: Sistema ERP, Sistema CRM">
           <div class="invalid-feedback" *ngIf="campoEsInvalido('sDescripcion')">
             {{ obtenerMensajeError('sDescripcion') }}
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="Idaplicacion">ID Aplicación <span class="required">*</span></label>
-          <input 
-            type="number" 
-            id="Idaplicacion" 
-            class="form-control"
-            [class.is-invalid]="campoEsInvalido('Idaplicacion')"
-            formControlName="Idaplicacion"
-            placeholder="Ej: 1">
-          <div class="invalid-feedback" *ngIf="campoEsInvalido('Idaplicacion')">
-            {{ obtenerMensajeError('Idaplicacion') }}
           </div>
         </div>
 

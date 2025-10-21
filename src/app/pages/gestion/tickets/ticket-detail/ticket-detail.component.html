@@ -23,13 +23,18 @@
         </div>
 
         <div class="detail-item">
-          <label>Aplicación:</label>
-          <span class="value">{{ obtenerAplicacion(ticket.IdAplicacion) }}</span>
+          <label>Sistema:</label>
+          <span class="value">{{ ticket.Sistema || obtenerSistema(ticket.IdSistema) || '-' }}</span>
         </div>
 
         <div class="detail-item">
           <label>Módulo:</label>
-          <span class="value">{{ obtenerModulo(ticket.IdModulo) }}</span>
+          <span class="value">{{ ticket.Modulo || obtenerModulo(ticket.IdModulo) || '-' }}</span>
+        </div>
+
+        <div class="detail-item">
+          <label>Página:</label>
+          <span class="value">{{ ticket.Pagina || obtenerPagina(ticket.IdPagina) || '-' }}</span>
         </div>
 
         <div class="detail-item">

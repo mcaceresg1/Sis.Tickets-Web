@@ -20,12 +20,12 @@ export class EmpresasComponent implements OnInit {
   private comboService = inject(ComboService);
 
   empresas: Empresa[] = [];
-  aplicaciones: ComboItem[] = [];
+  modulos: ComboItem[] = [];
   loading = false;
   errorMessage = '';
 
-  // ✅ NUEVO: Mapa de colores para aplicaciones
-  coloresAplicaciones: Map<number, string> = new Map();
+  // ✅ NUEVO: Mapa de colores para módulos
+  coloresModulos: Map<number, string> = new Map();
 
   // Modal
   mostrarModal = false;
@@ -49,23 +49,23 @@ export class EmpresasComponent implements OnInit {
     this.empresaForm = this.fb.group({
       Codigo: ['', [Validators.required, Validators.maxLength(20)]],
       RazonSocial: ['', [Validators.required, Validators.maxLength(100)]],
-      IdAplicacion: [[], Validators.required]  // ✅ MODIFICADO: Array para multiselect
+      IdModulo: [[], Validators.required]  // ✅ MODIFICADO: Array para multiselect
     });
   }
 
   /**
-   * ✅ NUEVO: Cargar catálogos (aplicaciones)
+   * ✅ NUEVO: Cargar catálogos (módulos)
    */
   cargarCatalogos(): void {
-    // Cargar Aplicaciones (ID = 9)
-    this.comboService.getAplicaciones().subscribe({
+    // Cargar Módulos (ID = 9)
+    this.comboService.getModulos().subscribe({
       next: (data) => {
-        this.aplicaciones = data;
-        this.asignarColoresAplicaciones(data);
-        console.log('✅ Aplicaciones cargadas:', data);
+        this.modulos = data;
+        this.asignarColoresModulos(data);
+        console.log('✅ Módulos cargadas:', data);
       },
       error: (error) => {
-        console.error('❌ Error al cargar aplicaciones:', error);
+        console.error('❌ Error al cargar módulos:', error);
       }
     });
   }
@@ -110,14 +110,14 @@ export class EmpresasComponent implements OnInit {
     this.empresaService.obtenerEmpresa(empresa.iID_Empresa).subscribe({
       next: (empresaCompleta) => {
         // Convertir string "1,2,3" a array [1,2,3]
-        const aplicacionesArray = empresaCompleta.IdAplicacion 
-          ? String(empresaCompleta.IdAplicacion).split(',').map(Number) 
+        const módulosArray = empresaCompleta.IdModulo 
+          ? String(empresaCompleta.IdModulo).split(',').map(Number) 
           : [];
         
         this.empresaForm.patchValue({
           Codigo: empresaCompleta.sRuc,
           RazonSocial: empresaCompleta.sRazonSocialE,
-          IdAplicacion: aplicacionesArray
+          IdModulo: módulosArray
         });
         
         this.mostrarModal = true;
@@ -125,7 +125,7 @@ export class EmpresasComponent implements OnInit {
         this.successMessage = '';
         
         console.log('✅ Empresa cargada para edición:', empresaCompleta);
-        console.log('✅ Aplicaciones:', aplicacionesArray);
+        console.log('✅ Módulos:', módulosArray);
       },
       error: (error) => {
         this.errorMessage = 'Error al cargar los datos de la empresa';
@@ -159,7 +159,7 @@ export class EmpresasComponent implements OnInit {
     const empresaData = {
       Codigo: this.empresaForm.value.Codigo,
       RazonSocial: this.empresaForm.value.RazonSocial,
-      IdAplicacion: this.convertirArrayAString(this.empresaForm.value.IdAplicacion),
+      IdModulo: this.convertirArrayAString(this.empresaForm.value.IdModulo),
       Usuaario: 'ADMIN' // Ajusta según tu lógica de usuario actual
     };
 
@@ -251,7 +251,7 @@ export class EmpresasComponent implements OnInit {
   /**
    * ✅ NUEVO: Asignar colores únicos a cada aplicación
    */
-  private asignarColoresAplicaciones(aplicaciones: ComboItem[]): void {
+  private asignarColoresModulos(módulos: ComboItem[]): void {
     const colores = [
       '#3b82f6', // blue
       '#10b981', // green
@@ -265,11 +265,11 @@ export class EmpresasComponent implements OnInit {
       '#84cc16', // lime
     ];
 
-    this.coloresAplicaciones.clear();
+    this.coloresModulos.clear();
     
-    aplicaciones.forEach((app, index) => {
+    módulos.forEach((app, index) => {
       const color = colores[index % colores.length];
-      this.coloresAplicaciones.set(app.Id, color);
+      this.coloresModulos.set(app.Id, color);
       console.log(`🎨 Aplicación ${app.Id} (${app.Descripcion}): ${color}`);
     });
   }

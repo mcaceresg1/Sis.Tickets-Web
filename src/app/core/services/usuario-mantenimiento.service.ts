@@ -13,9 +13,11 @@ export class UsuarioMantenimientoService {
 
   /**
    * Listar todos los usuarios activos con información completa
+   * @param idEmpresa - ID de la empresa para filtrar usuarios (opcional)
    */
-  listarUsuarios(): Observable<UsuarioList[]> {
-    return this.http.get<UsuarioList[]>(this.apiUrl);
+  listarUsuarios(idEmpresa?: number): Observable<UsuarioList[]> {
+    const params = idEmpresa ? `?idEmpresa=${idEmpresa}` : '';
+    return this.http.get<UsuarioList[]>(`${this.apiUrl}${params}`);
   }
 
   /**

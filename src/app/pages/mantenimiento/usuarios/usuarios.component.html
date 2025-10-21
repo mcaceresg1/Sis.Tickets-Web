@@ -27,44 +27,26 @@
             <th>Nombres</th>
             <th>Perfil</th>
             <th>Empresa</th>
-            <th>Aplicaciones / Módulos</th>
             <th>Email</th>
             <th>Cargo</th>
+            <th class="text-center">Estado</th>
             <th class="text-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let usuario of usuarios">
+          <tr *ngFor="let usuario of usuarios" [class.inactive-row]="usuario.sEstado === 'I'">
             <td>{{ usuario.iID_Usuario }}</td>
             <td class="text-nowrap">{{ usuario.sUsuario }}</td>
             <td>{{ usuario.Nombres }}</td>
             <td>{{ usuario.Perfil }}</td>
             <td>{{ usuario.sRazonSocialE }}</td>
-            <td>
-              <div class="access-tags">
-                <div class="access-section" *ngIf="usuario.IdAplicacion">
-                  <span class="access-label">Apps:</span>
-                  <span class="access-tag" 
-                        *ngFor="let app of obtenerAplicaciones(usuario.IdAplicacion)"
-                        [style.background-color]="obtenerColorAplicacion(app.id)">
-                    {{ app.nombre }}
-                  </span>
-                </div>
-                <div class="access-section" *ngIf="usuario.IdModulo">
-                  <span class="access-label">Mods:</span>
-                  <span class="access-tag-small" 
-                        *ngFor="let mod of obtenerModulos(usuario.IdModulo)"
-                        [style.background-color]="obtenerColorModulo(mod.id)">
-                    {{ mod.nombre }}
-                  </span>
-                </div>
-                <span class="text-muted" *ngIf="!usuario.IdAplicacion && !usuario.IdModulo">
-                  Sin asignar
-                </span>
-              </div>
-            </td>
             <td>{{ usuario.sCorreoElectronico }}</td>
             <td>{{ usuario.scargo }}</td>
+            <td class="text-center">
+              <span class="badge" [class.badge-success]="usuario.sEstado === 'A'" [class.badge-secondary]="usuario.sEstado === 'I'">
+                {{ usuario.sEstado === 'A' ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
             <td>
               <div class="action-buttons">
                 <button class="btn btn-sm btn-icon btn-warning" 
@@ -162,7 +144,7 @@
           <div class="tab-content" *ngIf="tabActiva === 0">
             <div class="form-row">
               <div class="form-group">
-                <label for="sUsuario">Usuario <span class="required" *ngIf="!modoEdicion">*</span></label>
+                <label for="sUsuario">Usuario <span class="required">*</span></label>
                 <input 
                   type="text" 
                   id="sUsuario" 
@@ -178,7 +160,7 @@
               </div>
 
               <div class="form-group">
-                <label for="sClave">Contraseña <span class="required" *ngIf="!modoEdicion">*</span></label>
+                <label for="sClave">Contraseña <span class="required">*</span></label>
                 <input 
                   type="password" 
                   id="sClave" 
@@ -315,20 +297,16 @@
 
             <div class="form-row">
               <div class="form-group">
-                <label for="IdSucursal">Sucursal <span class="required">*</span></label>
+                <label for="IdSucursal">Sucursal</label>
                 <select 
                   id="IdSucursal" 
                   class="form-control"
-                  [class.is-invalid]="campoEsInvalido('IdSucursal')"
                   formControlName="IdSucursal">
                   <option [ngValue]="null">Seleccione sucursal</option>
                   <option *ngFor="let sucursal of sucursales" [ngValue]="sucursal.Id">
                     {{ sucursal.Descripcion }}
                   </option>
                 </select>
-                <div class="invalid-feedback" *ngIf="campoEsInvalido('IdSucursal')">
-                  {{ obtenerMensajeError('IdSucursal') }}
-                </div>
               </div>
             </div>
           </div>
@@ -527,72 +505,47 @@
               </div>
 
               <div class="form-group">
-                <label>Aplicaciones</label>
-                <app-multi-select-tags
-                  [items]="aplicaciones"
-                  [placeholder]="'Seleccione aplicaciones'"
-                  [label]="'Aplicaciones'"
-                  [colorMap]="coloresAplicaciones"
-                  formControlName="IdAplicacion">
-                </app-multi-select-tags>
+                <label for="IdSistema">Sistema</label>
+                <select 
+                  id="IdSistema" 
+                  class="form-control"
+                  formControlName="IdSistema">
+                  <option [ngValue]="null">Seleccione sistema</option>
+                  <option *ngFor="let sistema of sistemas" [ngValue]="sistema.Id">
+                    {{ sistema.Descripcion }}
+                  </option>
+                </select>
               </div>
             </div>
 
             <div class="form-row">
-              <div class="form-group">
+              <div class="form-group" style="width: 100%;">
                 <label>Módulos</label>
                 <app-multi-select-tags
                   [items]="modulos"
                   [placeholder]="'Seleccione módulos'"
                   [label]="'Módulos'"
                   [colorMap]="coloresModulos"
-                  formControlName="IdModulo">
+                  formControlName="IdModulo"
+                  style="display: block; min-height: 42px;">
                 </app-multi-select-tags>
               </div>
             </div>
 
             <div class="form-row">
-              <div class="form-group">
-                <label for="sImpacto">Impacto</label>
-                <select 
-                  id="sImpacto" 
-                  class="form-control"
-                  formControlName="sImpacto">
-                  <option [ngValue]="null">Seleccione impacto</option>
-                  <option *ngFor="let impacto of impactos" [ngValue]="impacto.Id">
-                    {{ impacto.Descripcion }}
-                  </option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label for="sPrioridad">Prioridad</label>
-                <select 
-                  id="sPrioridad" 
-                  class="form-control"
-                  formControlName="sPrioridad">
-                  <option [ngValue]="null">Seleccione prioridad</option>
-                  <option *ngFor="let prioridad of prioridades" [ngValue]="prioridad.Id">
-                    {{ prioridad.Descripcion }}
-                  </option>
-                </select>
+              <div class="form-group" style="width: 100%;">
+                <label>Páginas</label>
+                <app-multi-select-tags
+                  [items]="paginas"
+                  [placeholder]="'Seleccione páginas'"
+                  [label]="'Páginas'"
+                  [colorMap]="coloresPaginas"
+                  formControlName="IdPagina"
+                  style="display: block; min-height: 42px;">
+                </app-multi-select-tags>
               </div>
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label for="sEstadoC">Estado</label>
-                <select 
-                  id="sEstadoC" 
-                  class="form-control"
-                  formControlName="sEstadoC">
-                  <option [ngValue]="null">Seleccione estado</option>
-                  <option *ngFor="let estado of estados" [ngValue]="estado.Id">
-                    {{ estado.Descripcion }}
-                  </option>
-                </select>
-              </div>
-            </div>
           </div>
 
           <div class="modal-actions">

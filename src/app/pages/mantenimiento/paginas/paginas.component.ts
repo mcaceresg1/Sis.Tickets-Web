@@ -1,23 +1,23 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AplicacionService } from '../../../core/services/aplicacion.service';
+import { PaginaService } from '../../../core/services/pagina.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Aplicacion, AplicacionList } from '../../../core/models/aplicacion.model';
+import { Pagina, PaginaList } from '../../../core/models/pagina.model';
 
 @Component({
-  selector: 'app-aplicaciones',
+  selector: 'app-paginas',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './aplicaciones.component.html',
-  styleUrls: ['./aplicaciones.component.scss']
+  templateUrl: './paginas.component.html',
+  styleUrls: ['./paginas.component.scss']
 })
-export class AplicacionesComponent implements OnInit {
+export class PaginasComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private aplicacionService = inject(AplicacionService);
+  private paginaService = inject(PaginaService);
   private authService = inject(AuthService);
 
-  aplicaciones: AplicacionList[] = [];
+  paginas: PaginaList[] = [];
   loading = false;
   errorMessage = '';
   idEmpresaUsuario: number = 1; // Se inicializará con el idEmpresa del usuario logueado
@@ -26,8 +26,8 @@ export class AplicacionesComponent implements OnInit {
   mostrarModal = false;
   modoEdicion = false;
   tituloModal = '';
-  aplicacionForm!: FormGroup;
-  aplicacionIdEdicion: number | null = null;
+  paginaForm!: FormGroup;
+  paginaIdEdicion: number | null = null;
 
   // Mensajes
   successMessage = '';
@@ -42,29 +42,30 @@ export class AplicacionesComponent implements OnInit {
     }
 
     this.inicializarFormulario();
-    this.cargarAplicaciones();
+    this.cargarPaginas();
   }
 
   inicializarFormulario(): void {
-    this.aplicacionForm = this.fb.group({
+    this.paginaForm = this.fb.group({
       sCodigo: ['', [Validators.required, Validators.maxLength(50)]],
-      sDescripcion: ['', [Validators.required, Validators.maxLength(100)]]
+      sDescripcion: ['', [Validators.required, Validators.maxLength(100)]],
+      IdModulo: [null, [Validators.required]]
     });
   }
 
-  cargarAplicaciones(): void {
+  cargarPaginas(): void {
     this.loading = true;
     this.errorMessage = '';
 
     // Enviar idEmpresa del usuario logueado
-    this.aplicacionService.listarAplicaciones(this.idEmpresaUsuario).subscribe({
-      next: (aplicaciones) => {
+    this.paginaService.listarPaginas(this.idEmpresaUsuario).subscribe({
+      next: (paginas) => {
         this.loading = false;
-        this.aplicaciones = aplicaciones;
+        this.paginas = paginas;
       },
       error: (error) => {
         this.loading = false;
-        this.errorMessage = 'Error al cargar las aplicaciones';
+        this.errorMessage = 'Error al cargar las páginas';
         console.error('Error:', error);
       }
     });
@@ -72,31 +73,32 @@ export class AplicacionesComponent implements OnInit {
 
   abrirModalNuevo(): void {
     this.modoEdicion = false;
-    this.tituloModal = 'Nueva Aplicación';
-    this.aplicacionIdEdicion = null;
-    this.aplicacionForm.reset();
+    this.tituloModal = 'Nueva Página';
+    this.paginaIdEdicion = null;
+    this.paginaForm.reset();
     this.mostrarModal = true;
     this.errorModal = '';
     this.successMessage = '';
   }
 
-  abrirModalEditar(aplicacion: AplicacionList): void {
-    // Obtener los datos completos de la aplicación
-    this.aplicacionService.obtenerAplicacion(aplicacion.IdApli).subscribe({
-      next: (aplicacionCompleta) => {
+  abrirModalEditar(pagina: PaginaList): void {
+    // Obtener los datos completos de la página
+    this.paginaService.obtenerPagina(pagina.IdPagina).subscribe({
+      next: (paginaCompleta) => {
         this.modoEdicion = true;
-        this.tituloModal = 'Editar Aplicación';
-        this.aplicacionIdEdicion = aplicacion.IdApli;
-        this.aplicacionForm.patchValue({
-          sCodigo: aplicacionCompleta.sCodigo,
-          sDescripcion: aplicacionCompleta.sDescripcion
+        this.tituloModal = 'Editar Página';
+        this.paginaIdEdicion = pagina.IdPagina;
+        this.paginaForm.patchValue({
+          sCodigo: paginaCompleta.sCodigo,
+          sDescripcion: paginaCompleta.sDescripcion,
+          IdModulo: paginaCompleta.IdModulo
         });
         this.mostrarModal = true;
         this.errorModal = '';
         this.successMessage = '';
       },
       error: (error) => {
-        this.errorMessage = 'Error al cargar los datos de la aplicación';
+        this.errorMessage = 'Error al cargar los datos de la página';
         console.error('Error:', error);
       }
     });
@@ -104,14 +106,14 @@ export class AplicacionesComponent implements OnInit {
 
   cerrarModal(): void {
     this.mostrarModal = false;
-    this.aplicacionForm.reset();
+    this.paginaForm.reset();
     this.errorModal = '';
     this.successMessage = '';
-    this.aplicacionIdEdicion = null;
+    this.paginaIdEdicion = null;
   }
 
-  guardarAplicacion(): void {
-    if (this.aplicacionForm.invalid) {
+  guardarPagina(): void {
+    if (this.paginaForm.invalid) {
       this.marcarCamposComoTocados();
       this.errorModal = 'Por favor complete todos los campos requeridos';
       return;
@@ -121,56 +123,53 @@ export class AplicacionesComponent implements OnInit {
     this.errorModal = '';
     this.successMessage = '';
 
-    // Obtener el usuario del login para enviarlo al backend
-    const currentUser = this.authService.getCurrentUser();
-    const usuario = currentUser?.nombre?.toLowerCase() || 'admin';
-
-    const aplicacionData = {
-      sCodigo: this.aplicacionForm.value.sCodigo,
-      sDescripcion: this.aplicacionForm.value.sDescripcion,
-      Usuario: usuario // Necesario para obtener IdEmpresa en el SP
+    const paginaData = {
+      sCodigo: this.paginaForm.value.sCodigo,
+      sDescripcion: this.paginaForm.value.sDescripcion,
+      IdModulo: this.paginaForm.value.IdModulo,
+      Usuario: 'ADMIN' // Ajusta según tu lógica de usuario actual
     };
 
-    if (this.modoEdicion && this.aplicacionIdEdicion !== null) {
+    if (this.modoEdicion && this.paginaIdEdicion !== null) {
       // Actualizar
-      this.aplicacionService.actualizarAplicacion(this.aplicacionIdEdicion, aplicacionData).subscribe({
+      this.paginaService.actualizarPagina(this.paginaIdEdicion, paginaData).subscribe({
         next: (response) => {
           this.loadingModal = false;
           if (response.success) {
-            this.successMessage = response.message || 'Aplicación actualizada exitosamente';
+            this.successMessage = response.message || 'Página actualizada exitosamente';
             setTimeout(() => {
               this.cerrarModal();
-              this.cargarAplicaciones();
+              this.cargarPaginas();
             }, 1500);
           } else {
-            this.errorModal = response.message || 'Error al actualizar la aplicación';
+            this.errorModal = response.message || 'Error al actualizar la página';
           }
         },
         error: (error) => {
           this.loadingModal = false;
-          const errorMsg = error.error?.errors?.[0] || error.error?.message || 'Error al actualizar la aplicación';
+          const errorMsg = error.error?.errors?.[0] || error.error?.message || 'Error al actualizar la página';
           this.errorModal = errorMsg;
           console.error('Error:', error);
         }
       });
     } else {
       // Crear
-      this.aplicacionService.crearAplicacion(aplicacionData).subscribe({
+      this.paginaService.crearPagina(paginaData).subscribe({
         next: (response) => {
           this.loadingModal = false;
           if (response.success) {
-            this.successMessage = response.message || 'Aplicación creada exitosamente';
+            this.successMessage = response.message || 'Página creada exitosamente';
             setTimeout(() => {
               this.cerrarModal();
-              this.cargarAplicaciones();
+              this.cargarPaginas();
             }, 1500);
           } else {
-            this.errorModal = response.message || 'Error al crear la aplicación';
+            this.errorModal = response.message || 'Error al crear la página';
           }
         },
         error: (error) => {
           this.loadingModal = false;
-          const errorMsg = error.error?.errors?.[0] || error.error?.message || 'Error al crear la aplicación';
+          const errorMsg = error.error?.errors?.[0] || error.error?.message || 'Error al crear la página';
           this.errorModal = errorMsg;
           console.error('Error:', error);
         }
@@ -179,19 +178,19 @@ export class AplicacionesComponent implements OnInit {
   }
 
   private marcarCamposComoTocados(): void {
-    Object.keys(this.aplicacionForm.controls).forEach(key => {
-      this.aplicacionForm.get(key)?.markAsTouched();
+    Object.keys(this.paginaForm.controls).forEach(key => {
+      this.paginaForm.get(key)?.markAsTouched();
     });
   }
 
   // Helpers para validación
   campoEsInvalido(campo: string): boolean {
-    const control = this.aplicacionForm.get(campo);
+    const control = this.paginaForm.get(campo);
     return !!(control && control.invalid && control.touched);
   }
 
   obtenerMensajeError(campo: string): string {
-    const control = this.aplicacionForm.get(campo);
+    const control = this.paginaForm.get(campo);
     if (control?.hasError('required')) {
       return 'Este campo es requerido';
     }

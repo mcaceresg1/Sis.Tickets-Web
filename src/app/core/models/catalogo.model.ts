@@ -1,6 +1,6 @@
-export interface Aplicacion {
-  idAplicacion: number;
-  nombreAplicacion: string;
+export interface Modulo {
+  idModulo: number;
+  nombreModulo: string;
   descripcion: string;
   version?: string;
   idEmpresa: number;
@@ -23,12 +23,12 @@ export interface Empresa {
   fechaCreacion: Date;
 }
 
-export interface Modulo {
+export interface Pagina {
+  idPagina: number;
+  nombrePagina: string;
+  descripcion?: string;
   idModulo: number;
   nombreModulo: string;
-  descripcion?: string;
-  idAplicacion: number;
-  nombreAplicacion: string;
   activo: boolean;
   fechaCreacion: Date;
 }

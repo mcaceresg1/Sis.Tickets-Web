@@ -1,12 +1,12 @@
 <div class="page-container">
   <div class="page-header">
-    <h1>Gestión de Perfiles</h1>
+    <h1>Gestión de Módulos</h1>
     <div class="header-actions">
       <button class="btn btn-primary" (click)="abrirModalNuevo()">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
           <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
         </svg>
-        Nuevo Perfil
+        Nueva Pagina
       </button>
     </div>
   </div>
@@ -16,26 +16,30 @@
     {{ errorMessage }}
   </div>
 
-  <!-- Tabla de Perfiles -->
+  <!-- Tabla de Módulos -->
   <div class="page-content" *ngIf="!loading">
     <div class="table-responsive">
       <table class="table">
         <thead>
           <tr>
             <th>ID</th>
-            <th>Nombre del Perfil</th>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Aplicación</th>
             <th class="text-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let perfil of perfiles">
-            <td>{{ perfil.IdPerfil }}</td>
-            <td class="text-nowrap">{{ perfil.Perfil }}</td>
+          <tr *ngFor="let pagina of paginas">
+            <td>{{ pagina.IdPagina }}</td>
+            <td class="text-nowrap">{{ pagina.sCodigo }}</td>
+            <td>{{ pagina.sDescripcion }}</td>
+            <td>{{ pagina.Modulo }}</td>
             <td>
               <div class="action-buttons">
                 <button class="btn btn-sm btn-icon btn-warning" 
-                        (click)="abrirModalEditar(perfil)" 
-                        title="Editar perfil">
+                        (click)="abrirModalEditar(pagina)" 
+                        title="Editar módulo">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
                   </svg>
@@ -46,8 +50,8 @@
         </tbody>
       </table>
       
-      <div class="no-data" *ngIf="perfiles.length === 0">
-        <p>No hay perfiles registrados{{ esAdministrador ? '' : ' para esta empresa' }}</p>
+      <div class="no-data" *ngIf="paginas.length === 0">
+        <p>No hay módulos registrados para esta empresa</p>
       </div>
     </div>
   </div>
@@ -55,11 +59,11 @@
   <!-- Loading -->
   <div class="loading-container" *ngIf="loading">
     <div class="spinner-border"></div>
-    <p>Cargando perfiles...</p>
+    <p>Cargando módulos...</p>
   </div>
 </div>
 
-<!-- Modal para Crear/Editar Perfil -->
+<!-- Modal para Crear/Editar Módulo -->
 <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -82,19 +86,48 @@
         {{ errorModal }}
       </div>
 
-      <form [formGroup]="perfilForm" (ngSubmit)="guardarPerfil()">
+      <form [formGroup]="paginaForm" (ngSubmit)="guardarPagina()">
         <div class="form-group">
-          <label for="Nombre">Nombre del Perfil <span class="required">*</span></label>
+          <label for="sCodigo">Código <span class="required">*</span></label>
           <input 
             type="text" 
-            id="Nombre" 
+            id="sCodigo" 
             class="form-control"
-            [class.is-invalid]="campoEsInvalido('Nombre')"
-            formControlName="Nombre"
+            [class.is-invalid]="campoEsInvalido('sCodigo')"
+            formControlName="sCodigo"
             maxlength="50"
-            placeholder="Ej: SUPERVISOR, GERENTE, ANALISTA">
-          <div class="invalid-feedback" *ngIf="campoEsInvalido('Nombre')">
-            {{ obtenerMensajeError('Nombre') }}
+            placeholder="Ej: VEN, COM, INV">
+          <div class="invalid-feedback" *ngIf="campoEsInvalido('sCodigo')">
+            {{ obtenerMensajeError('sCodigo') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="sDescripcion">Descripción <span class="required">*</span></label>
+          <input 
+            type="text" 
+            id="sDescripcion" 
+            class="form-control"
+            [class.is-invalid]="campoEsInvalido('sDescripcion')"
+            formControlName="sDescripcion"
+            maxlength="100"
+            placeholder="Ej: Módulo de Ventas, Módulo de Compras">
+          <div class="invalid-feedback" *ngIf="campoEsInvalido('sDescripcion')">
+            {{ obtenerMensajeError('sDescripcion') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="IdModulo">ID Aplicación <span class="required">*</span></label>
+          <input 
+            type="number" 
+            id="IdModulo" 
+            class="form-control"
+            [class.is-invalid]="campoEsInvalido('IdModulo')"
+            formControlName="IdModulo"
+            placeholder="Ej: 1">
+          <div class="invalid-feedback" *ngIf="campoEsInvalido('IdModulo')">
+            {{ obtenerMensajeError('IdModulo') }}
           </div>
         </div>
 

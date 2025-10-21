@@ -136,15 +136,16 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
   /**
    * Carga el menú dinámico del usuario
+   * El idPerfil se obtiene automáticamente del token JWT
    */
   loadMenu(): void {
-    if (!this.currentUser || !this.currentUser.nombre) {
+    if (!this.currentUser) {
       console.error('No hay usuario logueado');
       this.isLoadingMenu = false;
       return;
     }
 
-    this.menuService.getMenuPorUsuario(this.currentUser.nombre).subscribe({
+    this.menuService.getMenuPorUsuario().subscribe({
       next: (response) => {
         if (response.success) {
           // ⚠️ IMPORTANTE: Obtener la jerarquía procesada desde el servicio
@@ -169,6 +170,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('❌ Error al cargar menú:', error);
+        console.error('   Verifique que el token JWT contiene idPerfil');
         this.isLoadingMenu = false;
       }
     });
@@ -179,6 +181,18 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
    */
   isHeader(item: MenuItem): boolean {
     return this.menuService.isHeader(item);
+  }
+
+  /**
+   * Verifica si el item tiene un ícono válido (no es guion ni espacios)
+   */
+  hasValidIcon(item: MenuItem): boolean {
+    if (!item.sIcono) return false;
+    const iconoTrimmed = item.sIcono.trim();
+    return iconoTrimmed !== '' && 
+           iconoTrimmed !== '-' && 
+           iconoTrimmed !== '—' &&
+           iconoTrimmed !== '--';
   }
 
   /**

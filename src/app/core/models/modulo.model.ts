@@ -1,12 +1,11 @@
 /**
- * Modelo de Módulo para lista (con join a Aplicación)
+ * Modelo de Módulo para lista (con prefijo en código)
  */
 export interface ModuloList {
   IdModulo: number;
   sCodigo: string;
   sDescripcion: string;
-  Aplicacion: string;
-  IdAplicacion: number;
+  IdSistema?: number;
 }
 
 /**
@@ -16,7 +15,7 @@ export interface Modulo {
   IdModulo: number;
   sCodigo: string;
   sDescripcion: string;
-  Idaplicacion: number;
+  IdSistema?: number;
   sEstado?: string;
 }
 
@@ -26,7 +25,7 @@ export interface Modulo {
 export interface ModuloCreateRequest {
   sCodigo: string;
   sDescripcion: string;
-  Idaplicacion: number;
+  IdSistema: number;
   Usuario?: string;
 }
 
@@ -36,7 +35,7 @@ export interface ModuloCreateRequest {
 export interface ModuloUpdateRequest {
   sCodigo: string;
   sDescripcion: string;
-  Idaplicacion: number;
+  IdSistema: number;
   Usuario?: string;
 }
 
@@ -47,4 +46,3 @@ export interface ModuloApiResponse {
   success: boolean;
   message: string;
 }
-

@@ -36,8 +36,9 @@
             <th>Código</th>
             <th>Descripción</th>
             <th>Usuario</th>
-            <th>Aplicación</th>
+            <th>Sistema</th>
             <th>Módulo</th>
+            <th>Página</th>
             <th>Tipo</th>
             <th>Prioridad</th>
             <th>Estado</th>
@@ -53,8 +54,9 @@
               {{ ticket.sDescripcion.length > 50 ? (ticket.sDescripcion.substring(0, 50) + '...') : ticket.sDescripcion }}
             </td>
             <td>{{ ticket.Usuario }}</td>
-            <td>{{ ticket.Aplicacion }}</td>
-            <td>{{ ticket.Modulo }}</td>
+            <td>{{ ticket.Sistema || '-' }}</td>
+            <td>{{ ticket.Modulo || '-' }}</td>
+            <td>{{ ticket.Pagina || '-' }}</td>
             <td><span class="badge badge-tipo">{{ ticket.Tipo }}</span></td>
             <td><span class="badge badge-prioridad" [class.badge-urgente]="ticket.Prioridad === 'URGENTE'" [class.badge-normal]="ticket.Prioridad === 'NORMAL'">{{ ticket.Prioridad }}</span></td>
             <td><span class="badge badge-estado" 

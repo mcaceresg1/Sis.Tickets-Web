@@ -33,9 +33,15 @@ export const routes: Routes = [
       // ============================================
 
       // MENU DEL SISTEMA > Tickets
+      // BD: Controlador='Gestion', Vista='Tickets' → /gestion/Tickets
+      {
+        path: 'gestion/Tickets',
+        loadComponent: () => import('./pages/gestion/tickets/ticket-list/ticket-list.component').then(m => m.TicketListComponent)
+      },
       {
         path: 'gestion/tickets',
-        loadComponent: () => import('./pages/gestion/tickets/ticket-list/ticket-list.component').then(m => m.TicketListComponent)
+        redirectTo: 'gestion/Tickets',
+        pathMatch: 'full'
       },
       {
         path: 'gestion/tickets/new',
@@ -51,68 +57,93 @@ export const routes: Routes = [
       },
 
       // CONFIGURACION APP > Usuario (LUsuario)
+      // BD: Controlador='Mantenimiento', Vista='LUsuario' → /mantenimiento/LUsuario
       {
-        path: 'mantenimiento/lusuario',
+        path: 'mantenimiento/LUsuario',
         loadComponent: () => import('./pages/mantenimiento/usuarios/usuarios.component').then(m => m.UsuariosComponent)
       },
 
       // CONFIGURACION APP > Perfil (Perfiles)
+      // BD: Controlador='Seguridad', Vista='Perfiles' → /seguridad/Perfiles
       {
-        path: 'seguridad/perfiles',
+        path: 'seguridad/Perfiles',
         loadComponent: () => import('./pages/seguridad/perfiles/perfiles.component').then(m => m.PerfilesComponent)
       },
 
-      // CONFIGURACION APP > Aplicaciones
+      // CONFIGURACION APP > Sistemas
+      // BD: Controlador='Mantenimiento', Vista='Sistemas' → /mantenimiento/Sistemas
       {
-        path: 'mantenimiento/aplicacion',
-        loadComponent: () => import('./pages/mantenimiento/aplicaciones/aplicaciones.component').then(m => m.AplicacionesComponent)
+        path: 'mantenimiento/Sistemas',
+        loadComponent: () => import('./pages/mantenimiento/sistemas/sistemas.component').then(m => m.SistemasComponent)
       },
 
-      // CONFIGURACION APP > Modulos
+      // CONFIGURACION APP > Módulos
+      // BD: Controlador='Mantenimiento', Vista='Modulos' → /mantenimiento/Modulos
       {
-        path: 'mantenimiento/modulos',
+        path: 'mantenimiento/Modulos',
         loadComponent: () => import('./pages/mantenimiento/modulos/modulos.component').then(m => m.ModulosComponent)
       },
 
-      // CONFIGURACION APP > Empresas
+      // CONFIGURACION APP > Páginas
+      // BD: Controlador='Mantenimiento', Vista='Paginas' → /mantenimiento/Paginas
       {
-        path: 'mantenimiento/empresa',
+        path: 'mantenimiento/Paginas',
+        loadComponent: () => import('./pages/mantenimiento/paginas/paginas.component').then(m => m.PaginasComponent)
+      },
+
+      // CONFIGURACION APP > Empresas
+      // BD: Controlador='Mantenimiento', Vista='Empresa' → /mantenimiento/Empresa
+      {
+        path: 'mantenimiento/Empresa',
         loadComponent: () => import('./pages/mantenimiento/empresas/empresas.component').then(m => m.EmpresasComponent)
       },
 
       // CONFIGURACION APP > Sucursales
+      // BD: Controlador='Mantenimiento', Vista='Sucursal' → /mantenimiento/Sucursal
       {
-        path: 'mantenimiento/sucursal',
+        path: 'mantenimiento/Sucursal',
         loadComponent: () => import('./pages/mantenimiento/sucursales/sucursales.component').then(m => m.SucursalesComponent)
       },
 
       // CONFIGURACION APP > Tipo Empresa
+      // BD: Controlador='Mantenimiento', Vista='TipoEmpresa' → /mantenimiento/TipoEmpresa
       {
-        path: 'mantenimiento/tipoempresa',
+        path: 'mantenimiento/TipoEmpresa',
         loadComponent: () => import('./pages/mantenimiento/tipo-empresa/tipo-empresa.component').then(m => m.TipoEmpresaComponent)
       },
 
       // CONFIGURACION APP > Pais
+      // BD: Controlador='Mantenimiento', Vista='Pais' → /mantenimiento/Pais
       {
-        path: 'mantenimiento/pais',
+        path: 'mantenimiento/Pais',
         loadComponent: () => import('./pages/mantenimiento/pais/pais.component').then(m => m.PaisComponent)
       },
 
-      // CONFIGURACION TKs > Prioridad (Urgencia)
+      // CONFIGURACION APP > Asignación Menú a Perfil
+      // BD: Controlador='Seguridad', Vista='MenuPerfil' → /seguridad/MenuPerfil
       {
-        path: 'mantenimiento/urgencia',
+        path: 'seguridad/MenuPerfil',
+        loadComponent: () => import('./pages/mantenimiento/menu-perfil/menu-perfil.component').then(m => m.MenuPerfilComponent)
+      },
+
+      // CONFIGURACION TKs > Prioridad (Urgencia)
+      // BD: Controlador='Mantenimiento', Vista='Urgencia' → /mantenimiento/Urgencia
+      {
+        path: 'mantenimiento/Urgencia',
         loadComponent: () => import('./pages/mantenimiento/prioridad/prioridad.component').then(m => m.PrioridadComponent)
       },
 
       // CONFIGURACION TKs > Estado
+      // BD: Controlador='Mantenimiento', Vista='Estado' → /mantenimiento/Estado
       {
-        path: 'mantenimiento/estado',
+        path: 'mantenimiento/Estado',
         loadComponent: () => import('./pages/mantenimiento/estado/estado.component').then(m => m.EstadoComponent)
       },
 
       // CONFIGURACION TKs > Impacto (Inpacto)
+      // BD: Controlador='Mantenimiento', Vista='Inpacto' → /mantenimiento/Inpacto
       {
-        path: 'mantenimiento/inpacto',
+        path: 'mantenimiento/Inpacto',
         loadComponent: () => import('./pages/mantenimiento/impacto/impacto.component').then(m => m.ImpactoComponent)
       },
 

@@ -5,8 +5,9 @@ export interface Ticket {
   sCodigo: string;
   sDescripcion: string;
   Usuario: string;
-  Aplicacion: string;
-  Modulo: string;
+  Sistema: string;     // ✅ NUEVO: Sistema (nivel 1)
+  Modulo: string;      // Módulo (nivel 2)
+  Pagina: string;      // Página (nivel 3)
   Tipo: string;
   Prioridad: string;
   Estado: string;
@@ -20,10 +21,14 @@ export interface TicketDetail {
   sCodigo: string;
   IdUsuario: number;
   dfechaTicket: string;
-  IdModulo: number;
+  IdSistema?: number;       // ✅ NUEVO: ID del Sistema
+  Sistema?: string;         // ✅ NUEVO: Nombre del Sistema
+  IdModulo: number;         // ID del Módulo
+  Modulo?: string;          // ✅ NUEVO: Nombre del Módulo
+  IdPagina: number;         // ID de la Página
+  Pagina?: string;          // ✅ NUEVO: Nombre de la Página
   sDescripcion: string;
   IdTipo: number;
-  IdAplicacion: number;
   IdPrioridad: number;
   IdEstado: number;
   IdInpacto: number;
@@ -32,8 +37,8 @@ export interface TicketDetail {
 
 export interface TicketFilter {
   Usuario?: number;
-  Aplicacion?: number;
-  Modulo?: number;
+  Modulo?: number;      // Antes: Aplicacion
+  Pagina?: number;      // Antes: Modulo
   Tipo?: number;
   Prioridad?: number;
   Estado?: number;
@@ -54,8 +59,9 @@ export interface TicketListResponse {
 export interface TicketCreateRequest {
   codigo: string;
   descripcion: string;
-  idAplicacion: number;
-  idModulo?: number | null;
+  idSistema: number;          // ✅ NUEVO: Sistema (jerarquía nivel 1)
+  idModulo: number;           // Módulo (jerarquía nivel 2)
+  idPagina?: number | null;   // Página (jerarquía nivel 3)
   idTipo?: number | null;
   idEstado?: number | null;
   idPrioridad?: number | null;
@@ -65,8 +71,9 @@ export interface TicketCreateRequest {
 export interface TicketUpdateRequest {
   codigo?: string;
   descripcion?: string;
-  idAplicacion?: number | null;
-  idModulo?: number | null;
+  idSistema?: number | null;    // ✅ NUEVO: Sistema (jerarquía nivel 1)
+  idModulo?: number | null;     // Módulo (jerarquía nivel 2)
+  idPagina?: number | null;     // Página (jerarquía nivel 3)
   idTipo?: number | null;
   idEstado?: number | null;
   idPrioridad?: number | null;

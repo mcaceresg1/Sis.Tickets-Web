@@ -1,4 +1,4 @@
-@use '../../../pages/_shared-page-styles.scss';
+@import '../../../pages/_shared-page-styles.scss';
 
 .page-container {
   min-height: 100vh;
@@ -81,6 +81,15 @@
     }
   }
 
+  &.btn-danger {
+    background-color: #dc3545;
+    color: white;
+
+    &:hover {
+      background-color: #c82333;
+    }
+  }
+
   &.btn-sm {
     padding: 6px 12px;
     font-size: 14px;
@@ -111,7 +120,6 @@
       font-weight: 600;
       color: #333;
       border-bottom: 2px solid #dee2e6;
-      white-space: nowrap;
 
       &.text-center {
         text-align: center;
@@ -126,15 +134,6 @@
 
       &:hover {
         background-color: #f8f9fa;
-      }
-
-      &.inactive-row {
-        opacity: 0.6;
-        background-color: #f9f9f9;
-        
-        td {
-          color: #999;
-        }
       }
 
       td {
@@ -255,21 +254,16 @@
 .modal-content {
   background: white;
   border-radius: 12px;
-  width: auto;
-  min-width: 700px;   // ✅ Ancho mínimo
-  max-width: 850px;   // ✅ Ancho justo para las 6 pestañas
-  max-height: 95vh;   // ✅ Más alto (antes 90vh)
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.3s ease;
-
-  &.modal-large {
-    max-width: 1000px; // Un poco más grande si se necesita
-  }
 }
 
 .modal-header {
-  padding: 16px 24px;  // ✅ Padding reducido (antes 24px)
+  padding: 24px;
   border-bottom: 1px solid #dee2e6;
   display: flex;
   justify-content: space-between;
@@ -277,7 +271,7 @@
 
   h2 {
     margin: 0;
-    font-size: 22px;   // ✅ Ligeramente más pequeño
+    font-size: 24px;
     color: #333;
   }
 
@@ -301,75 +295,17 @@
 }
 
 .modal-body {
-  padding: 16px 24px;  // ✅ Padding reducido (antes 24px)
-}
-
-// Tabs Styles
-.tabs-container {
-  width: 100%;
-}
-
-.tabs-nav {
-  display: flex;
-  gap: 8px;
-  border-bottom: 2px solid #e0e0e0;
-  margin-bottom: 16px;  // ✅ Reducido (antes 24px)
-  overflow-x: auto;
-  
-  .tab-btn {
-    padding: 12px 20px;
-    background: none;
-    border: none;
-    border-bottom: 3px solid transparent;
-    cursor: pointer;
-    font-weight: 500;
-    color: #666;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    font-size: 14px;
-
-    &:hover {
-      color: #667eea;
-      background-color: #f8f9fa;
-    }
-
-    &.active {
-      color: #667eea;
-      border-bottom-color: #667eea;
-      background-color: #f8f9fa;
-    }
-  }
-}
-
-.tab-content {
-  animation: fadeIn 0.3s ease;
-}
-
-.tab-title {
-  margin: 0 0 20px 0;
-  color: #333;
-  font-size: 18px;
-  font-weight: 600;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 16px;           // ✅ Reducido (antes 20px)
-  margin-bottom: 12px; // ✅ Reducido (antes 20px)
+  padding: 24px;
 }
 
 .form-group {
-  margin-bottom: 0; // Ya está manejado por form-row
+  margin-bottom: 20px;
 
   label {
     display: block;
-    margin-bottom: 6px;   // ✅ Reducido (antes 8px)
+    margin-bottom: 8px;
     font-weight: 500;
     color: #333;
-    font-size: 13px;      // ✅ Reducido (antes 14px)
 
     .required {
       color: #dc3545;
@@ -378,7 +314,7 @@
 
   .form-control {
     width: 100%;
-    padding: 8px 12px;    // ✅ Reducido (antes 10px 12px)
+    padding: 10px 12px;
     border: 1px solid #ced4da;
     border-radius: 6px;
     font-size: 14px;
@@ -399,35 +335,11 @@
     }
   }
 
-  textarea.form-control {
-    resize: vertical;
-    min-height: 80px;
-  }
-
   .invalid-feedback {
     display: block;
     margin-top: 6px;
     font-size: 12px;
     color: #dc3545;
-  }
-
-  .form-text {
-    display: block;
-    margin-top: 6px;
-    font-size: 12px;
-    color: #6c757d;
-  }
-}
-
-.form-note {
-  margin-top: 16px;
-  padding: 12px;
-  background-color: #e3f2fd;
-  border-left: 4px solid #2196f3;
-  border-radius: 4px;
-
-  small {
-    color: #1976d2;
   }
 }
 
@@ -435,8 +347,8 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 16px;   // ✅ Reducido (antes 24px)
-  padding-top: 16px;  // ✅ Reducido (antes 24px)
+  margin-top: 24px;
+  padding-top: 24px;
   border-top: 1px solid #dee2e6;
 }
 
@@ -460,93 +372,3 @@
   }
 }
 
-// =========================================
-// ESTILOS PARA TAGS DE APLICACIONES/MÓDULOS
-// =========================================
-.access-tags {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-width: 300px;
-
-  .access-section {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-
-  .access-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #6b7280;
-    min-width: 40px;
-  }
-
-  .access-tag {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 500;
-    color: white;
-    white-space: nowrap;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-    }
-  }
-
-  .access-tag-small {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 10px;
-    font-weight: 500;
-    color: white;
-    white-space: nowrap;
-    opacity: 0.9;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-
-    &:hover {
-      opacity: 1;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.12);
-    }
-  }
-
-  .text-muted {
-    font-size: 12px;
-    color: #9ca3af;
-    font-style: italic;
-  }
-}
-
-// =========================================
-// BADGES DE ESTADO
-// =========================================
-.badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-
-  &.badge-success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-  }
-
-  &.badge-secondary {
-    background-color: #e2e3e5;
-    color: #383d41;
-    border: 1px solid #d6d8db;
-  }
-}

@@ -22,8 +22,8 @@ export class TicketService {
     
     // Agregar parámetros de filtro si existen
     if (filtro.Usuario !== undefined) params = params.set('Usuario', filtro.Usuario.toString());
-    if (filtro.Aplicacion !== undefined) params = params.set('Aplicacion', filtro.Aplicacion.toString());
     if (filtro.Modulo !== undefined) params = params.set('Modulo', filtro.Modulo.toString());
+    if (filtro.Pagina !== undefined) params = params.set('Pagina', filtro.Pagina.toString());
     if (filtro.Tipo !== undefined) params = params.set('Tipo', filtro.Tipo.toString());
     if (filtro.Prioridad !== undefined) params = params.set('Prioridad', filtro.Prioridad.toString());
     if (filtro.Estado !== undefined) params = params.set('Estado', filtro.Estado.toString());

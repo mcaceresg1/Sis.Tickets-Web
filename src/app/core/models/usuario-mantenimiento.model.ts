@@ -17,8 +17,10 @@ export interface UsuarioList {
   workgroup1: string;
   workgroup2: string;
   workgroup3: string;
-  IdAplicacion?: string;  // IDs separados por comas: "1,2,4"
-  IdModulo?: string;       // IDs separados por comas: "10,15,20"
+  IdSistema?: number;  // ✅ NUEVO: Sistema asignado
+  IdModulo?: string;   // IDs separados por comas: "1,2,4"
+  IdPagina?: string;   // IDs separados por comas: "10,15,20"
+  sEstado?: string;    // ✅ NUEVO: Estado (A = Activo, I = Inactivo)
 }
 
 /**
@@ -52,8 +54,9 @@ export interface UsuarioEdit {
   workgroup8?: string;
   workgroup9?: string;
   workgroup10?: string;
-  IdAplicacion?: string | number;
+  IdSistema?: number;          // ✅ NUEVO: Sistema asignado
   IdModulo?: string | number;
+  IdPagina?: string | number;
   sImpacto?: string | number;
   sPrioridad?: string | number;
   sEstadoC?: string | number;
@@ -68,9 +71,9 @@ export interface UsuarioCreateRequest {
   sNombre: string;
   ApePaterno: string;
   ApeMaterno: string;
-  IdPerfil: number;
-  IdEmpresa: number;
-  IdSucursal: number;
+  IdPerfil: number | null;
+  IdEmpresa: number | null;
+  IdSucursal: number | null;
   IdDocumento: number | string | null;
   sNumero: string;
   Correo?: string;
@@ -81,8 +84,9 @@ export interface UsuarioCreateRequest {
   workgroup1?: string;
   workgroup2?: string;
   workgroup3?: string;
-  IdAplicacion?: string;  // String "1,2,3" para multiselect
-  IdModulo?: string;      // String "1,2,3" para multiselect
+  IdSistema?: number;  // ✅ NUEVO: Sistema asignado
+  IdModulo?: string;   // String "1,2,3" para multiselect
+  IdPagina?: string;   // String "1,2,3" para multiselect
   sImpacto?: number | null;
   sPrioridad?: number | null;
   sEstadoC?: number | null;
@@ -98,9 +102,9 @@ export interface UsuarioUpdateRequest {
   sNombre: string;
   ApePaterno: string;
   ApeMaterno: string;
-  IdPerfil: number;
-  IdEmpresa: number;
-  IdSucursal: number;
+  IdPerfil: number | null;
+  IdEmpresa: number | null;
+  IdSucursal: number | null;
   IdDocumento: number | string | null;
   sNumero: string;
   Correo?: string;
@@ -111,8 +115,9 @@ export interface UsuarioUpdateRequest {
   workgroup1?: string;
   workgroup2?: string;
   workgroup3?: string;
-  IdAplicacion?: string;  // String "1,2,3" para multiselect
-  IdModulo?: string;      // String "1,2,3" para multiselect
+  IdSistema?: number;  // ✅ NUEVO: Sistema asignado
+  IdModulo?: string;   // String "1,2,3" para multiselect
+  IdPagina?: string;   // String "1,2,3" para multiselect
   sImpacto?: number | null;
   sPrioridad?: number | null;
   sEstadoC?: number | null;

@@ -36,16 +36,19 @@ export class UsuariosComponent implements OnInit {
   empresas: ComboItem[] = [];
   sucursales: ComboItem[] = [];
   tiposDocumento: ComboItem[] = [];
-  aplicaciones: ComboItem[] = [];
-  modulos: ComboItem[] = [];                 // Módulos filtrados por aplicación
-  modulosCompletos: ComboItem[] = [];        // ✅ TODOS los módulos (sin filtrar)
+  sistemas: ComboItem[] = [];               // ✅ NUEVO: Sistemas
+  modulos: ComboItem[] = [];                // Módulos filtrados por sistema
+  modulosCompletos: ComboItem[] = [];       // ✅ TODOS los módulos
+  paginas: ComboItem[] = [];                // Páginas filtradas por módulo
+  paginasCompletas: ComboItem[] = [];       // ✅ TODAS las páginas
   impactos: ComboItem[] = [];
   prioridades: ComboItem[] = [];
   estados: ComboItem[] = [];
   
-  // ✅ NUEVO: Mapas de colores
-  coloresAplicaciones: Map<number, string> = new Map();
+  // ✅ Mapas de colores por nivel
+  coloresSistemas: Map<number, string> = new Map();
   coloresModulos: Map<number, string> = new Map();
+  coloresPaginas: Map<number, string> = new Map();
 
   // Info del usuario logueado
   idEmpresaUsuario: number = 1;
@@ -76,8 +79,8 @@ export class UsuariosComponent implements OnInit {
     }
 
     this.inicializarFormulario();
-    this.configurarFiltroModulosPorAplicacion();  // ✅ NUEVO: Configurar filtrado dinámico
-    this.cargarCatalogos();
+    this.cargarCatalogos();  // Primero cargar catálogos
+    this.configurarFiltradoCascada();  // Después configurar filtrado
     this.cargarUsuarios();
   }
 
@@ -97,7 +100,7 @@ export class UsuariosComponent implements OnInit {
       // Permisos y Asignación (Tab 3)
       IdPerfil: [null, Validators.required],
       IdEmpresa: [null, Validators.required],  // ✅ Sin valor por defecto
-      IdSucursal: [null, Validators.required],
+      IdSucursal: [null],  // ✅ OPCIONAL: Sucursal no es obligatoria
       
       // Datos de Contacto (Tab 4)
       Correo: ['', [Validators.email, Validators.maxLength(200)]],
@@ -119,8 +122,9 @@ export class UsuariosComponent implements OnInit {
       
       // Configuración Adicional (Tab 6)
       sImagen: ['', Validators.maxLength(100)],
-      IdAplicacion: [[]],  // Array para multiselect
-      IdModulo: [[]],      // Array para multiselect
+      IdSistema: [null],    // ✅ NUEVO: Sistema (single select)
+      IdModulo: [[]],       // Array para multiselect de módulos
+      IdPagina: [[]],       // Array para multiselect de páginas
       sImpacto: [null],
       sPrioridad: [null],
       sEstadoC: [null]
@@ -128,6 +132,16 @@ export class UsuariosComponent implements OnInit {
   }
 
   cargarCatalogos(): void {
+    // Cargar Sistemas (ID = 16)
+    this.comboService.getSistemas().subscribe({
+      next: (data) => {
+        this.sistemas = data;
+        this.asignarColoresSistemas(data);  // ✅ Asignar colores a sistemas
+        console.log('✅ Sistemas cargados:', data);
+      },
+      error: (error) => console.error('❌ Error al cargar sistemas:', error)
+    });
+
     // Cargar Perfiles
     this.perfilService.listarPerfiles(this.idEmpresaUsuario, this.idPerfilUsuario).subscribe({
       next: (response) => {
@@ -169,28 +183,27 @@ export class UsuariosComponent implements OnInit {
       }
     });
 
-    // Cargar Aplicaciones (ID = 9)
-    this.comboService.getAplicaciones().subscribe({
-      next: (data) => {
-        this.aplicaciones = data;
-        this.asignarColoresAplicaciones(data);  // ✅ NUEVO: Asignar colores
-        console.log('✅ Aplicaciones cargadas:', data);
-        console.log('🎨 Colores de aplicaciones asignados');
-      },
-      error: (error) => {
-        console.error('❌ Error al cargar aplicaciones:', error);
-      }
-    });
-
-    // Cargar TODOS los Módulos (ID = 11)
+    // Cargar TODOS los Módulos (ID = 9)
     this.comboService.getModulos().subscribe({
       next: (data) => {
         this.modulosCompletos = data;  // ✅ Guardar TODOS los módulos
-        this.modulos = [];             // Inicialmente vacío (se filtrará al seleccionar aplicaciones)
+        this.modulos = [];              // Inicialmente vacío (se filtrará por sistema)
         console.log('✅ Módulos completos cargados:', data.length, 'módulos');
       },
       error: (error) => {
         console.error('❌ Error al cargar módulos:', error);
+      }
+    });
+
+    // Cargar TODAS las Páginas (ID = 11)
+    this.comboService.getAllPaginas().subscribe({
+      next: (data) => {
+        this.paginasCompletas = data;  // ✅ Guardar TODAS las páginas
+        this.paginas = [];             // Inicialmente vacío (se filtrará por módulos)
+        console.log('✅ Páginas completas cargadas:', data.length, 'páginas');
+      },
+      error: (error) => {
+        console.error('❌ Error al cargar páginas:', error);
       }
     });
 
@@ -232,10 +245,12 @@ export class UsuariosComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    this.usuarioService.listarUsuarios().subscribe({
+    // ✅ Filtrar usuarios por la empresa del usuario logueado
+    this.usuarioService.listarUsuarios(this.idEmpresaUsuario).subscribe({
       next: (usuarios) => {
         this.loading = false;
         this.usuarios = usuarios;
+        console.log(`✅ Usuarios cargados (Empresa ${this.idEmpresaUsuario}):`, usuarios.length);
       },
       error: (error) => {
         this.loading = false;
@@ -259,8 +274,10 @@ export class UsuariosComponent implements OnInit {
     this.usuarioForm.patchValue({
       sUsuario: '',      // ✅ Explícitamente vacío
       sClave: '',        // ✅ Explícitamente vacío
-      IdAplicacion: [],  // Arrays vacíos para multiselects
-      IdModulo: []       // Arrays vacíos para multiselects
+      IdEmpresa: null,   // ✅ Sin pre-selección - usuario elige manualmente
+      IdSistema: null,   // ✅ Sin pre-selección - usuario elige manualmente
+      IdModulo: [],      // Arrays vacíos para multiselects
+      IdPagina: []       // Arrays vacíos para multiselects
     });
     
     // ✅ En modo NUEVO, Usuario y Contraseña son REQUERIDOS
@@ -269,18 +286,16 @@ export class UsuariosComponent implements OnInit {
     this.usuarioForm.get('sUsuario')?.updateValueAndValidity();
     this.usuarioForm.get('sClave')?.updateValueAndValidity();
     
-    // ✅ Limpiar módulos disponibles (no mostrar módulos sin aplicaciones seleccionadas)
+    // ✅ Limpiar módulos y páginas (se cargarán al seleccionar sistema)
     this.modulos = [];
+    this.paginas = [];
+    
+    // ✅ Campo IdEmpresa habilitado - puede seleccionar cualquier empresa
+    this.usuarioForm.get('IdEmpresa')?.enable();
     
     this.mostrarModal = true;
     this.errorModal = '';
     this.successMessage = '';
-    
-    // ✅ FORZAR limpieza de los campos después de un pequeño delay
-    setTimeout(() => {
-      this.usuarioForm.get('sUsuario')?.setValue('');
-      this.usuarioForm.get('sClave')?.setValue('');
-    }, 0);
   }
 
   abrirModalEditar(usuario: UsuarioList): void {
@@ -293,17 +308,16 @@ export class UsuariosComponent implements OnInit {
         this.usuarioActual = usuarioCompleto;  // ✅ NUEVO: Guardar datos originales
         this.tabActiva = 0;
         
-        // ✅ En modo EDICIÓN, Usuario y Contraseña son OPCIONALES
-        this.usuarioForm.get('sUsuario')?.clearValidators();
-        this.usuarioForm.get('sClave')?.clearValidators();
-        this.usuarioForm.get('sUsuario')?.setValidators([Validators.maxLength(50)]);
-        this.usuarioForm.get('sClave')?.setValidators([Validators.maxLength(100)]);
+        // ✅ En modo EDICIÓN, Usuario y Contraseña siguen siendo REQUERIDOS
+        this.usuarioForm.get('sUsuario')?.setValidators([Validators.required, Validators.maxLength(50)]);
+        this.usuarioForm.get('sClave')?.setValidators([Validators.required, Validators.maxLength(100)]);
         this.usuarioForm.get('sUsuario')?.updateValueAndValidity();
         this.usuarioForm.get('sClave')?.updateValueAndValidity();
         
+        // ✅ Primero cargar datos básicos (sin IdModulo e IdPagina todavía)
         this.usuarioForm.patchValue({
-          sUsuario: '',  // ✅ VACÍO - Usuario decide si cambia
-          sClave: '',    // ✅ VACÍO - Usuario decide si cambia
+          sUsuario: usuarioCompleto.sUsuario,  // ✅ Mostrar usuario actual
+          sClave: usuarioCompleto.Pass,        // ✅ Mostrar contraseña desencriptada
           sNombre: usuarioCompleto.sNombres,
           ApePaterno: usuarioCompleto.sApePaterno,
           ApeMaterno: usuarioCompleto.sApeMaterno,
@@ -327,24 +341,60 @@ export class UsuariosComponent implements OnInit {
           workgroup9: usuarioCompleto.workgroup9 || '',
           workgroup10: usuarioCompleto.workgroup10 || '',
           sImagen: usuarioCompleto.sImgen || '',
-          IdAplicacion: usuarioCompleto.IdAplicacion ? String(usuarioCompleto.IdAplicacion).split(',').map(Number) : [],
-          IdModulo: usuarioCompleto.IdModulo ? String(usuarioCompleto.IdModulo).split(',').map(Number) : [],
+          IdSistema: usuarioCompleto.IdSistema || null,  // ✅ NUEVO: Sistema
           sImpacto: this.convertirANumero(usuarioCompleto.sImpacto),
           sPrioridad: this.convertirANumero(usuarioCompleto.sPrioridad),
           sEstadoC: this.convertirANumero(usuarioCompleto.sEstadoC)
         });
         
-        // ✅ NUEVO: Si hay aplicaciones seleccionadas, cargar sus módulos
-        if (usuarioCompleto.IdAplicacion) {
-          const idsAplicaciones = String(usuarioCompleto.IdAplicacion).split(',').map(Number);
-          this.filtrarModulosPorAplicaciones(idsAplicaciones);
+        // ✅ DESPUÉS cargar módulos y asignar valores
+        if (usuarioCompleto.IdSistema) {
+          this.comboService.getModulosPorSistema(usuarioCompleto.IdSistema).subscribe({
+            next: (data) => {
+              this.modulos = data;
+              this.asignarColoresModulos(this.modulos);
+              console.log('✅ Módulos cargados para edición:', this.modulos.length);
+              console.log('📦 Módulos disponibles:', this.modulos);
+              
+              // ✅ Ahora SÍ asignar los módulos seleccionados
+              if (usuarioCompleto.IdModulo) {
+                const idsModulos = String(usuarioCompleto.IdModulo).split(',').map(Number);
+                console.log('📋 Asignando módulos seleccionados:', idsModulos);
+                
+                // Asignar con un pequeño delay para asegurar que el componente esté listo
+                setTimeout(() => {
+                  this.usuarioForm.patchValue({ 
+                    IdModulo: idsModulos 
+                  }, { emitEvent: false });
+                  
+                  console.log('✅ Módulos asignados al form:', idsModulos);
+                  
+                  // Ahora cargar páginas de esos módulos
+                  this.filtrarPaginasPorModulos(idsModulos);
+                }, 200);
+              }
+            },
+            error: (error) => {
+              console.error('❌ Error al cargar módulos:', error);
+              this.modulos = [];
+            }
+          });
+        } else {
+          // Si no hay sistema, asignar módulos vacíos
+          this.usuarioForm.patchValue({ 
+            IdModulo: [],
+            IdPagina: []
+          }, { emitEvent: false });
         }
+        
+        // ✅ Campo IdEmpresa habilitado - puede cambiar de empresa
+        this.usuarioForm.get('IdEmpresa')?.enable();
         
         console.log('✅ Usuario cargado para edición:', usuarioCompleto);
         console.log('✅ Valores pre-seleccionados:', {
           TipoDocumento: usuarioCompleto.iID_DocumnetoI,
-          Aplicaciones: usuarioCompleto.IdAplicacion,
           Modulos: usuarioCompleto.IdModulo,
+          Paginas: usuarioCompleto.IdPagina,
           Impacto: usuarioCompleto.sImpacto,
           Prioridad: usuarioCompleto.sPrioridad,
           Estado: usuarioCompleto.sEstadoC
@@ -364,10 +414,12 @@ export class UsuariosComponent implements OnInit {
   cerrarModal(): void {
     this.mostrarModal = false;
     this.usuarioForm.reset({
-      IdAplicacion: [],  // ✅ Limpiar multiselects
-      IdModulo: []
+      IdModulo: [],      // ✅ Limpiar multiselects
+      IdPagina: []
     });
-    this.modulos = [];  // ✅ Limpiar módulos disponibles
+    this.usuarioForm.get('IdEmpresa')?.enable();  // ✅ Re-habilitar campo IdEmpresa
+    this.modulos = [];     // ✅ Limpiar módulos disponibles
+    this.paginas = [];     // ✅ Limpiar páginas disponibles
     this.errorModal = '';
     this.successMessage = '';
     this.usuarioIdEdicion = null;
@@ -388,45 +440,45 @@ export class UsuariosComponent implements OnInit {
     const currentUser = this.authService.getCurrentUser();
     const usuario = currentUser?.nombre?.toLowerCase() || 'admin';
     
-    const formValue = this.usuarioForm.value;
-
-    // ✅ NUEVO: Si está en modo EDICIÓN y campos vacíos, usar valores originales
-    const sUsuarioFinal = formValue.sUsuario || (this.modoEdicion && this.usuarioActual ? this.usuarioActual.sUsuario : '');
-    const sClaveFinal = formValue.sClave || (this.modoEdicion && this.usuarioActual ? this.usuarioActual.Pass : '');
+    // ✅ USAR getRawValue() para obtener también campos deshabilitados (como IdEmpresa)
+    const formValue = this.usuarioForm.getRawValue();
 
     const usuarioData = {
-      sUsuario: sUsuarioFinal,
-      sClave: sClaveFinal,
+      sUsuario: formValue.sUsuario,
+      sClave: formValue.sClave,
       sNombre: formValue.sNombre,
-      ApePaterno: this.usuarioForm.value.ApePaterno,
-      ApeMaterno: this.usuarioForm.value.ApeMaterno || '',
-      IdPerfil: this.usuarioForm.value.IdPerfil,
-      IdEmpresa: this.usuarioForm.value.IdEmpresa,
-      IdSucursal: this.usuarioForm.value.IdSucursal,
-      IdDocumento: this.usuarioForm.value.IdDocumento || null,
-      sNumero: this.usuarioForm.value.sNumero,
-      Correo: this.usuarioForm.value.Correo || '',
-      sTelefono: this.usuarioForm.value.sTelefono || '',
-      sDireccion: this.usuarioForm.value.sDireccion || '',
-      sCargo: this.usuarioForm.value.sCargo || '',
-      sImagen: this.usuarioForm.value.sImagen || '',
-      workgroup1: this.usuarioForm.value.workgroup1 || '',
-      workgroup2: this.usuarioForm.value.workgroup2 || '',
-      workgroup3: this.usuarioForm.value.workgroup3 || '',
-      workgroup4: this.usuarioForm.value.workgroup4 || '',
-      workgroup5: this.usuarioForm.value.workgroup5 || '',
-      workgroup6: this.usuarioForm.value.workgroup6 || '',
-      workgroup7: this.usuarioForm.value.workgroup7 || '',
-      workgroup8: this.usuarioForm.value.workgroup8 || '',
-      workgroup9: this.usuarioForm.value.workgroup9 || '',
-      workgroup10: this.usuarioForm.value.workgroup10 || '',
-      IdAplicacion: this.convertirArrayAString(this.usuarioForm.value.IdAplicacion),
-      IdModulo: this.convertirArrayAString(this.usuarioForm.value.IdModulo),
-      sImpacto: this.usuarioForm.value.sImpacto || null,
-      sPrioridad: this.usuarioForm.value.sPrioridad || null,
-      sEstadoC: this.usuarioForm.value.sEstadoC || null,
+      ApePaterno: formValue.ApePaterno,
+      ApeMaterno: formValue.ApeMaterno || '',
+      IdPerfil: this.convertirANumero(formValue.IdPerfil),  // ✅ Convertir a número
+      IdEmpresa: this.convertirANumero(formValue.IdEmpresa),  // ✅ Convertir a número
+      IdSucursal: this.convertirANumero(formValue.IdSucursal),  // ✅ NULL si vacío
+      IdDocumento: this.convertirANumero(formValue.IdDocumento),  // ✅ Convertir a número
+      sNumero: formValue.sNumero,
+      Correo: formValue.Correo || '',
+      sTelefono: formValue.sTelefono || '',
+      sDireccion: formValue.sDireccion || '',
+      sCargo: formValue.sCargo || '',
+      sImagen: formValue.sImagen || '',
+      workgroup1: formValue.workgroup1 || '',
+      workgroup2: formValue.workgroup2 || '',
+      workgroup3: formValue.workgroup3 || '',
+      workgroup4: formValue.workgroup4 || '',
+      workgroup5: formValue.workgroup5 || '',
+      workgroup6: formValue.workgroup6 || '',
+      workgroup7: formValue.workgroup7 || '',
+      workgroup8: formValue.workgroup8 || '',
+      workgroup9: formValue.workgroup9 || '',
+      workgroup10: formValue.workgroup10 || '',
+      IdSistema: this.convertirANumero(formValue.IdSistema) || 1,  // ✅ Sistema (default 1)
+      IdModulo: this.convertirArrayAString(formValue.IdModulo),
+      IdPagina: this.convertirArrayAString(formValue.IdPagina),
+      sImpacto: formValue.sImpacto || null,
+      sPrioridad: formValue.sPrioridad || null,
+      sEstadoC: formValue.sEstadoC || null,
       Usuario: usuario
     };
+
+    console.log('📤 Datos a enviar al backend:', usuarioData);
 
     if (this.modoEdicion && this.usuarioIdEdicion !== null) {
       // Actualizar
@@ -506,36 +558,78 @@ export class UsuariosComponent implements OnInit {
   }
 
   /**
-   * ✅ NUEVO: Configurar filtrado automático de módulos cuando cambian las aplicaciones
+   * ✅ NUEVO: Configurar filtrado en cascada: Sistema → Módulos → Páginas
    */
-  private configurarFiltroModulosPorAplicacion(): void {
-    this.usuarioForm.get('IdAplicacion')?.valueChanges.subscribe((aplicacionesSeleccionadas: number[]) => {
-      console.log('📱 Aplicaciones seleccionadas:', aplicacionesSeleccionadas);
-      this.filtrarModulosPorAplicaciones(aplicacionesSeleccionadas);
+  private configurarFiltradoCascada(): void {
+    // Cuando cambia el sistema, filtrar módulos
+    this.usuarioForm.get('IdSistema')?.valueChanges.subscribe((idSistema: number | null) => {
+      console.log('🏢 Sistema seleccionado:', idSistema);
+      this.filtrarModulosPorSistema(idSistema);
+    });
+
+    // Cuando cambian los módulos, filtrar páginas
+    this.usuarioForm.get('IdModulo')?.valueChanges.subscribe((modulosSeleccionados: number[]) => {
+      console.log('📦 Módulos seleccionados:', modulosSeleccionados);
+      this.filtrarPaginasPorModulos(modulosSeleccionados);
     });
   }
 
   /**
-   * ✅ NUEVO: Filtrar módulos según las aplicaciones seleccionadas
+   * ✅ Filtrar módulos según el sistema seleccionado (llamada al backend)
    */
-  private filtrarModulosPorAplicaciones(idsAplicaciones: number[]): void {
-    // Si no hay aplicaciones seleccionadas, limpiar módulos
-    if (!idsAplicaciones || idsAplicaciones.length === 0) {
+  private filtrarModulosPorSistema(idSistema: number | null): void {
+    console.log('🔍 filtrarModulosPorSistema llamado con:', idSistema);
+    
+    // Si no hay sistema seleccionado, limpiar módulos y páginas
+    if (!idSistema) {
       this.modulos = [];
+      this.paginas = [];
+      this.usuarioForm.patchValue({ IdModulo: [], IdPagina: [] }, { emitEvent: false });
+      console.log('⚠️ No hay sistema seleccionado, módulos y páginas limpiados');
+      return;
+    }
+
+    // Llamar al backend para obtener módulos del sistema
+    this.comboService.getModulosPorSistema(idSistema).subscribe({
+      next: (data) => {
+        this.modulos = data;
+        this.asignarColoresModulos(this.modulos);
+        
+        // Limpiar páginas
+        this.paginas = [];
+        this.usuarioForm.patchValue({ IdModulo: [], IdPagina: [] }, { emitEvent: false });
+        
+        console.log(`✅ Módulos filtrados para sistema ${idSistema}:`, this.modulos.length);
+        console.log('📋 Módulos disponibles:', this.modulos);
+      },
+      error: (error) => {
+        console.error('❌ Error al cargar módulos por sistema:', error);
+        this.modulos = [];
+      }
+    });
+  }
+
+  /**
+   * ✅ Filtrar páginas según los módulos seleccionados
+   */
+  private filtrarPaginasPorModulos(idsModulos: number[]): void {
+    // Si no hay módulos seleccionados, limpiar páginas
+    if (!idsModulos || idsModulos.length === 0) {
+      this.paginas = [];
       this.usuarioForm.patchValue({ IdModulo: [] }, { emitEvent: false });
-      console.log('⚠️ No hay aplicaciones seleccionadas, módulos limpiados');
+      console.log('⚠️ No hay módulos seleccionados, páginas limpiadas');
       return;
     }
 
     // Si no hay módulos completos cargados, esperar
-    if (this.modulosCompletos.length === 0) {
+    if (this.paginasCompletas.length === 0) {
       console.log('⏳ Esperando carga de módulos completos...');
       return;
     }
 
     // Filtrar módulos usando forkJoin para obtener módulos de cada aplicación
-    const requests = idsAplicaciones.map(idAplicacion => 
-      this.comboService.getModulosPorAplicacion(idAplicacion)
+    const requests = idsModulos.map(idModulo => 
+      this.comboService.getPaginasPorModulo(idModulo)
     );
 
     forkJoin(requests).subscribe({
@@ -543,40 +637,33 @@ export class UsuariosComponent implements OnInit {
         // Combinar todos los resultados y eliminar duplicados
         const modulosUnicos = new Map<number, ComboItem>();
         
-        // ✅ NUEVO: Guardar relación módulo → aplicación para colores
-        const modulosPorAplicacion: { idAplicacion: number; modulos: ComboItem[] }[] = [];
-        
-        resultados.forEach((modulos, index) => {
-          const idAplicacion = idsAplicaciones[index];
-          modulosPorAplicacion.push({ idAplicacion, modulos });
+        // ✅ NUEVO: Guardar relación módulo → página para colores
+          const paginasPorModulo: { idModulo: number; paginas: ComboItem[] }[] = [];
           
-          modulos.forEach(modulo => {
-            modulosUnicos.set(modulo.Id, modulo);
+          resultados.forEach((paginas, index) => {
+            const idModulo = idsModulos[index];
+            paginasPorModulo.push({ idModulo, paginas });
+          
+            paginas.forEach((pagina: ComboItem) => {
+              modulosUnicos.set(pagina.Id, pagina);
+            });
           });
-        });
 
-        this.modulos = Array.from(modulosUnicos.values());
+        this.paginas = Array.from(modulosUnicos.values());
         
         // ✅ NUEVO: Asignar colores a los módulos según su aplicación
-        this.asignarColoresModulos(modulosPorAplicacion);
+        this.asignarColoresPaginas(paginasPorModulo);
         
-        console.log('✅ Módulos filtrados:', this.modulos.length, 'de', this.modulosCompletos.length);
-        console.log('📋 Aplicaciones:', idsAplicaciones);
-        console.log('📦 Módulos disponibles:', this.modulos.map(m => `${m.Id}: ${m.Descripcion}`));
+        console.log('✅ Páginas filtradas:', this.paginas.length, 'de', this.paginasCompletas.length);
+        console.log('📋 Módulos seleccionados:', idsModulos);
+        console.log('📦 Páginas disponibles:', this.paginas.map(m => `${m.Id}: ${m.Descripcion}`));
 
-        // Limpiar módulos seleccionados que ya no están disponibles
-        const modulosActuales = this.usuarioForm.get('IdModulo')?.value as number[] || [];
-        const idsModulosDisponibles = this.modulos.map(m => m.Id);
-        const modulosValidos = modulosActuales.filter(id => idsModulosDisponibles.includes(id));
-        
-        if (modulosActuales.length !== modulosValidos.length) {
-          this.usuarioForm.patchValue({ IdModulo: modulosValidos }, { emitEvent: false });
-          console.log('🔄 Módulos seleccionados filtrados:', modulosValidos);
-        }
+        // ✅ NO limpiar módulos seleccionados - solo estamos filtrando páginas
+        // Los módulos seleccionados deben permanecer intactos
       },
       error: (error) => {
         console.error('❌ Error al cargar módulos por aplicación:', error);
-        this.modulos = [];
+        this.paginas = [];
       }
     });
   }
@@ -607,9 +694,21 @@ export class UsuariosComponent implements OnInit {
   }
 
   /**
-   * ✅ NUEVO: Asignar colores únicos a cada aplicación
+   * ✅ NUEVO: Asignar colores únicos a cada sistema
    */
-  private asignarColoresAplicaciones(aplicaciones: ComboItem[]): void {
+  private asignarColoresSistemas(sistemas: ComboItem[]): void {
+    const colores = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
+    this.coloresSistemas.clear();
+    sistemas.forEach((sistema, index) => {
+      const color = colores[index % colores.length];
+      this.coloresSistemas.set(sistema.Id, color);
+    });
+  }
+
+  /**
+   * ✅ NUEVO: Asignar colores únicos a cada módulo
+   */
+  private asignarColoresModulos(modulos: ComboItem[]): void {
     const colores = [
       '#3b82f6', // blue
       '#10b981', // green
@@ -623,58 +722,37 @@ export class UsuariosComponent implements OnInit {
       '#84cc16', // lime
     ];
 
-    this.coloresAplicaciones.clear();
+    this.coloresModulos.clear();
     
-    aplicaciones.forEach((app, index) => {
+    modulos.forEach((mod, index) => {
       const color = colores[index % colores.length];
-      this.coloresAplicaciones.set(app.Id, color);
-      console.log(`🎨 Aplicación ${app.Id} (${app.Descripcion}): ${color}`);
+      this.coloresModulos.set(mod.Id, color);
     });
   }
 
   /**
    * ✅ NUEVO: Asignar a cada módulo el color de su aplicación padre
    */
-  private asignarColoresModulos(modulosPorAplicacion: { idAplicacion: number; modulos: ComboItem[] }[]): void {
-    this.coloresModulos.clear();
+  private asignarColoresPaginas(paginasPorModulo: { idModulo: number; paginas: ComboItem[] }[]): void {
+    this.coloresPaginas.clear();
     
-    modulosPorAplicacion.forEach(({ idAplicacion, modulos }) => {
-      const colorAplicacion = this.coloresAplicaciones.get(idAplicacion);
+    paginasPorModulo.forEach(({ idModulo, paginas }) => {
+      const colorModulo = this.coloresModulos.get(idModulo);
       
-      if (colorAplicacion) {
-        modulos.forEach(modulo => {
-          this.coloresModulos.set(modulo.Id, colorAplicacion);
-          console.log(`  🎨 Módulo ${modulo.Id} (${modulo.Descripcion}) → ${colorAplicacion} (de app ${idAplicacion})`);
+      if (colorModulo) {
+        paginas.forEach((pagina: ComboItem) => {
+          this.coloresPaginas.set(pagina.Id, colorModulo);
+          console.log(`  🎨 Página ${pagina.Id} (${pagina.Descripcion}) → ${colorModulo} (de módulo ${idModulo})`);
         });
       }
     });
 
-    console.log('✅ Colores de módulos asignados:', this.coloresModulos.size, 'módulos');
-  }
-
-  /**
-   * ✅ NUEVO: Obtener aplicaciones a partir de string de IDs
-   * "1,2,4" → [{ id: 1, nombre: "Sistema Tickets" }, { id: 2, nombre: "ERP" }, ...]
-   */
-  obtenerAplicaciones(idsString: string): { id: number; nombre: string }[] {
-    if (!idsString || idsString.trim() === '') {
-      return [];
-    }
-
-    const ids = idsString.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
-    
-    return ids.map(id => {
-      const aplicacion = this.aplicaciones.find(app => app.Id === id);
-      return {
-        id,
-        nombre: aplicacion ? aplicacion.Descripcion : `App ${id}`
-      };
-    });
+    console.log('✅ Colores de módulos asignados:', this.coloresPaginas.size, 'módulos');
   }
 
   /**
    * ✅ NUEVO: Obtener módulos a partir de string de IDs
-   * "10,15,20" → [{ id: 10, nombre: "Tickets" }, { id: 15, nombre: "Usuarios" }, ...]
+   * "1,2,4" → [{ id: 1, nombre: "Sistema Tickets" }, { id: 2, nombre: "ERP" }, ...]
    */
   obtenerModulos(idsString: string): { id: number; nombre: string }[] {
     if (!idsString || idsString.trim() === '') {
@@ -684,7 +762,7 @@ export class UsuariosComponent implements OnInit {
     const ids = idsString.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
     
     return ids.map(id => {
-      const modulo = this.modulosCompletos.find(mod => mod.Id === id);
+      const modulo = this.paginasCompletas.find(mod => mod.Id === id);
       return {
         id,
         nombre: modulo ? modulo.Descripcion : `Mod ${id}`
@@ -693,23 +771,16 @@ export class UsuariosComponent implements OnInit {
   }
 
   /**
-   * ✅ NUEVO: Obtener color de una aplicación
-   */
-  obtenerColorAplicacion(id: number): string {
-    return this.coloresAplicaciones.get(id) || '#6b7280'; // gris por defecto
-  }
-
-  /**
-   * ✅ NUEVO: Obtener color de un módulo (hereda del color de su aplicación)
+   * ✅ NUEVO: Obtener color de un módulo
    */
   obtenerColorModulo(id: number): string {
-    // Buscar el módulo para obtener su aplicación padre
-    const modulo = this.modulosCompletos.find(m => m.Id === id);
-    if (modulo) {
-      // Buscar en el servicio de combos para obtener la aplicación del módulo
-      // Por ahora, usar un color por defecto
-      return this.coloresModulos.get(id) || '#6b7280'; // gris por defecto
-    }
-    return '#6b7280';
+    return this.coloresModulos.get(id) || '#6b7280'; // gris por defecto
+  }
+  
+  /**
+   * ✅ NUEVO: Obtener color de una página (hereda del color de su módulo padre)
+   */
+  obtenerColorPagina(id: number): string {
+    return this.coloresPaginas.get(id) || '#6b7280'; // gris por defecto
   }
 }

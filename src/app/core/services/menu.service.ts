@@ -15,10 +15,10 @@ export class MenuService {
 
   /**
    * Obtiene el menú por usuario desde el procedimiento almacenado
-   * @param usuario Nombre del usuario
+   * El idPerfil se obtiene automáticamente del token JWT
    */
-  getMenuPorUsuario(usuario: string): Observable<MenuResponse> {
-    return this.http.get<MenuResponse>(`${environment.apiUrl}/menu/${usuario}`)
+  getMenuPorUsuario(): Observable<MenuResponse> {
+    return this.http.get<MenuResponse>(`${environment.apiUrl}/menu`)
       .pipe(
         tap(response => {
           if (response.success && response.data) {
@@ -106,8 +106,9 @@ export class MenuService {
     }
     
     // Construir la ruta basada en Vista y Controlador
+    // Convertir controlador a minúsculas, pero mantener el case de Vista
     const controller = item.Controlador.toLowerCase();
-    const vista = item.Vista.toLowerCase();
+    const vista = item.Vista; // Mantener case original para Vista
     
     return `/${controller}/${vista}`;
   }

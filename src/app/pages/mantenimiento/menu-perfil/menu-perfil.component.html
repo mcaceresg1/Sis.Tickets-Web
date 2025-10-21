@@ -1,0 +1,163 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>Asignación de Menú a Perfil</h1>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="abrirModalNuevo()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+        </svg>
+        Nueva Asignación
+      </button>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div class="alert alert-success" *ngIf="successMessage && !mostrarModal">
+    {{ successMessage }}
+  </div>
+
+  <!-- Error Message -->
+  <div class="alert alert-error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Tabla de Asignaciones -->
+  <div class="page-content" *ngIf="!loading">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Perfil</th>
+            <th>Menú</th>
+            <th>Usuario Registro</th>
+            <th>Fecha Registro</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let asignacion of menuPerfil">
+            <td>{{ asignacion.PerfilNombre }}</td>
+            <td>{{ asignacion.MenuDescripcion }}</td>
+            <td>{{ asignacion.sUserReg }}</td>
+            <td>{{ asignacion.dFechaReg | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-icon btn-warning" 
+                        (click)="abrirModalEditar(asignacion)" 
+                        title="Editar asignación">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                  </svg>
+                </button>
+                <button class="btn btn-sm btn-icon btn-danger" 
+                        (click)="eliminarMenuPerfil(asignacion)" 
+                        title="Eliminar asignación">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="no-data" *ngIf="menuPerfil.length === 0">
+        <p>No hay asignaciones registradas</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner-border"></div>
+    <p>Cargando asignaciones...</p>
+  </div>
+</div>
+
+<!-- Modal para Crear/Editar Asignación -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ tituloModal }}</h2>
+      <button class="btn-close" (click)="cerrarModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Success Message -->
+      <div class="alert alert-success" *ngIf="successMessage" style="white-space: pre-line;">
+        {{ successMessage }}
+      </div>
+
+      <!-- Error Message -->
+      <div class="alert alert-error" *ngIf="errorModal">
+        {{ errorModal }}
+      </div>
+
+      <form [formGroup]="menuPerfilForm" (ngSubmit)="guardarMenuPerfil()">
+        <!-- Información importante -->
+        <div class="alert alert-info" *ngIf="!modoEdicion" style="margin-bottom: 20px; padding: 12px; background-color: #e3f2fd; border-left: 4px solid #2196f3; color: #1565c0;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+            </svg>
+            <strong>Nota:</strong> Al asignar un submenu (hijo), se insertará automáticamente su menú padre (cabecera) si no existe.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="iID_PerfilUsuario">Perfil <span class="required">*</span></label>
+          <select 
+            id="iID_PerfilUsuario" 
+            class="form-control"
+            [class.is-invalid]="campoEsInvalido('iID_PerfilUsuario')"
+            formControlName="iID_PerfilUsuario">
+            <option [value]="null">Seleccione un perfil</option>
+            <option *ngFor="let perfil of perfiles" [value]="perfil.Id">
+              {{ perfil.Descripcion }}
+            </option>
+          </select>
+          <div class="invalid-feedback" *ngIf="campoEsInvalido('iID_PerfilUsuario')">
+            {{ obtenerMensajeError('iID_PerfilUsuario') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="iID_Menu">Menú <span class="required">*</span></label>
+          <select 
+            id="iID_Menu" 
+            class="form-control"
+            [class.is-invalid]="campoEsInvalido('iID_Menu')"
+            formControlName="iID_Menu">
+            <option [value]="null">Seleccione un menú</option>
+            <option *ngFor="let menu of menus" [value]="menu.Id">
+              {{ menu.Descripcion }}
+            </option>
+          </select>
+          <div class="invalid-feedback" *ngIf="campoEsInvalido('iID_Menu')">
+            {{ obtenerMensajeError('iID_Menu') }}
+          </div>
+          <small class="form-text text-muted" style="display: block; margin-top: 5px;">
+            💡 Puede asignar tanto menús padre (cabeceras) como menús hijo (opciones)
+          </small>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModal()" [disabled]="loadingModal">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="loadingModal">
+            <span *ngIf="!loadingModal">{{ modoEdicion ? 'Actualizar' : 'Guardar' }}</span>
+            <span *ngIf="loadingModal">Guardando...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+

@@ -27,8 +27,9 @@ export class TicketDetailComponent {
 
   // Mapeos de IDs a descripciones
   usuarios: Map<number, string> = new Map();
+  sistemas: Map<number, string> = new Map();      // ✅ NUEVO: Mapeo de Sistemas
+  paginas: Map<number, string> = new Map();
   modulos: Map<number, string> = new Map();
-  aplicaciones: Map<number, string> = new Map();
   tiposIncidencia: Map<number, string> = new Map();
   prioridades: Map<number, string> = new Map();
   estados: Map<number, string> = new Map();
@@ -58,12 +59,13 @@ export class TicketDetailComponent {
         this.ticket = ticket;
 
         // Ahora cargar todos los combos
-        // IMPORTANTE: Para el detalle, cargamos TODOS los módulos (activos e inactivos)
-        // para garantizar que el módulo del ticket esté en el mapeo
+        // IMPORTANTE: Para el detalle, cargamos TODOS los combos (activos e inactivos)
+        // para garantizar que los valores del ticket estén en el mapeo
         forkJoin({
           usuarios: this.comboService.getUsuarios(),
-          modulos: this.comboService.getAllModulos(), // Cargar TODOS los módulos (incluso inactivos)
-          aplicaciones: this.comboService.getAplicaciones(),
+          sistemas: this.comboService.getSistemas(),      // ✅ NUEVO: Cargar sistemas
+          paginas: this.comboService.getAllPaginas(),     // Cargar TODAS las páginas (incluso inactivas)
+          modulos: this.comboService.getModulos(),
           tiposIncidencia: this.comboService.getTiposIncidencia(),
           prioridades: this.comboService.getPrioridades(),
           estados: this.comboService.getEstados(),
@@ -74,15 +76,16 @@ export class TicketDetailComponent {
 
             // Crear mapeos de ID a Descripción
             this.usuarios = this.crearMapeo(resultado.usuarios);
+            this.sistemas = this.crearMapeo(resultado.sistemas);      // ✅ NUEVO: Mapeo de sistemas
+            this.paginas = this.crearMapeo(resultado.paginas);
             this.modulos = this.crearMapeo(resultado.modulos);
-            this.aplicaciones = this.crearMapeo(resultado.aplicaciones);
             this.tiposIncidencia = this.crearMapeo(resultado.tiposIncidencia);
             this.prioridades = this.crearMapeo(resultado.prioridades);
             this.estados = this.crearMapeo(resultado.estados);
             this.impactos = this.crearMapeo(resultado.impactos);
 
             console.log('✅ Detalle del ticket cargado con descripciones');
-            console.log('Módulos mapeados:', this.modulos);
+            console.log('Módulos mapeados:', this.paginas);
             console.log('ID Módulo del ticket:', this.ticket?.IdModulo);
           },
           error: (error) => {
@@ -114,14 +117,19 @@ export class TicketDetailComponent {
     return this.usuarios.get(id) || `ID: ${id}`;
   }
 
+  obtenerSistema(id: number | null | undefined): string {
+    if (!id) return 'N/A';
+    return this.sistemas.get(id) || `ID: ${id}`;
+  }
+
   obtenerModulo(id: number | null | undefined): string {
     if (!id) return 'N/A';
     return this.modulos.get(id) || `ID: ${id}`;
   }
-
-  obtenerAplicacion(id: number | null | undefined): string {
+  
+  obtenerPagina(id: number | null | undefined): string {
     if (!id) return 'N/A';
-    return this.aplicaciones.get(id) || `ID: ${id}`;
+    return this.paginas.get(id) || `ID: ${id}`;
   }
 
   obtenerTipoIncidencia(id: number | null | undefined): string {

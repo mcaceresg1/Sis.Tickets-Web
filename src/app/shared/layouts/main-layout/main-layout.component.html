@@ -47,10 +47,17 @@
               [style.padding-left.px]="level > 0 ? 24 + (level * 16) : null">
             
             <div class="menu-item-content" (click)="navigateToMenuItem(item, $event)">
-              <!-- Icono personalizado (solo si no es guion) -->
-              <i class="material-icons menu-icon" *ngIf="item.sIcono && item.sIcono !== '-' && item.sIcono !== '—' && item.sIcono.trim() !== '' && item.sIcono.trim() !== '-'">{{ item.sIcono }}</i>
-              <!-- Icono por defecto: carpeta para cabeceras y items con guion -->
-              <i class="material-icons menu-icon" *ngIf="!item.sIcono || item.sIcono === '-' || item.sIcono === '—' || item.sIcono.trim() === '' || item.sIcono.trim() === '-'">
+              <!-- Icono personalizado -->
+              <ng-container *ngIf="hasValidIcon(item)">
+                <!-- Bootstrap Icons (si empieza con 'bi bi-') -->
+                <i [class]="item.sIcono.trim() + ' menu-icon'" 
+                   *ngIf="item.sIcono.trim().startsWith('bi bi-')"></i>
+                <!-- Material Icons (otros casos) -->
+                <i class="material-icons menu-icon" 
+                   *ngIf="!item.sIcono.trim().startsWith('bi bi-')">{{ item.sIcono.trim() }}</i>
+              </ng-container>
+              <!-- Icono por defecto -->
+              <i class="material-icons menu-icon" *ngIf="!hasValidIcon(item)">
                 {{ isHeader(item) || item.subItems?.length ? 'folder' : (level === 0 ? 'description' : 'arrow_right') }}
               </i>
               <span *ngIf="!menuCollapsed" class="menu-text">{{ item.Menu }}</span>

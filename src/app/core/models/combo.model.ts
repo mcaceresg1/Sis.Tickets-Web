@@ -19,9 +19,9 @@ export enum ComboType {
   PAIS_ALT = 6,
   SUCURSAL = 7,
   TIPO_DOCUMENTO = 8,
-  APLICACION = 9,
+  MODULO = 9,               // Módulos (antes: Aplicación)
   USUARIO = 10,
-  MODULOS = 11,
+  PAGINAS = 11,             // Páginas (antes: Módulos)
   TIPO_INCIDENCIA = 12,
   PRIORIDAD_ALT = 13,
   ESTADO_ALT = 14,
@@ -29,5 +29,7 @@ export enum ComboType {
   EMPRESA = 16,
   TIPO_EMPRESA = 17,
   PERFIL = 18,
+  MENU = 19,
+  SISTEMA = 20,             // ✅ CORREGIDO: Sistema ahora es ID 20
 }
 

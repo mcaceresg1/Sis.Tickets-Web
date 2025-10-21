@@ -3,9 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { 
-  Aplicacion, 
-  Empresa, 
   Modulo, 
+  Empresa, 
+  Pagina,
   Pais, 
   Estado, 
   Prioridad, 
@@ -26,13 +26,13 @@ export class CatalogoService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/mantenimiento`;
 
-  // Aplicaciones
-  listarAplicaciones(): Observable<ApiResponse<Aplicacion[]>> {
-    return this.http.get<ApiResponse<Aplicacion[]>>(`${this.apiUrl}/aplicaciones`);
+  // Módulos (antes Aplicaciones)
+  listarModulos(): Observable<ApiResponse<Modulo[]>> {
+    return this.http.get<ApiResponse<Modulo[]>>(`${this.apiUrl}/modulos`);
   }
 
-  crearAplicacion(aplicacion: Partial<Aplicacion>): Observable<ApiResponse<any>> {
-    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/aplicacion`, aplicacion);
+  crearModulo(modulo: Partial<Modulo>): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/modulo`, modulo);
   }
 
   // Empresas
@@ -45,8 +45,8 @@ export class CatalogoService {
   }
 
   // Módulos
-  listarModulos(idAplicacion: number): Observable<ApiResponse<Modulo[]>> {
-    return this.http.get<ApiResponse<Modulo[]>>(`${this.apiUrl}/modulos/${idAplicacion}`);
+  listarPaginas(idModulo: number): Observable<ApiResponse<Pagina[]>> {
+    return this.http.get<ApiResponse<Pagina[]>>(`${this.apiUrl}/Paginas/${idModulo}`);
   }
 
   // Países

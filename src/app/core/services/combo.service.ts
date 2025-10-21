@@ -67,10 +67,18 @@ export class ComboService {
   }
 
   /**
-   * Obtener combo de Aplicaciones
+   * Obtener combo de Módulos (antes Aplicaciones)
    */
-  getAplicaciones(): Observable<ComboItem[]> {
-    return this.getComboById(ComboType.APLICACION);
+  getModulos(): Observable<ComboItem[]> {
+    return this.getComboById(ComboType.MODULO);
+  }
+
+  /**
+   * Obtener módulos filtrados por sistema
+   * @param idSistema - ID del sistema para filtrar módulos
+   */
+  getModulosPorSistema(idSistema: number): Observable<ComboItem[]> {
+    return this.http.get<ComboItem[]>(`${this.apiUrl}/modulos/${idSistema}`);
   }
 
   /**
@@ -81,26 +89,33 @@ export class ComboService {
   }
 
   /**
-   * Obtener combo de Módulos (todos)
+   * Obtener combo de Páginas (todas - antes Módulos)
    */
-  getModulos(): Observable<ComboItem[]> {
-    return this.getComboById(ComboType.MODULOS);
+  getPaginas(): Observable<ComboItem[]> {
+    return this.getComboById(ComboType.PAGINAS);
   }
 
   /**
-   * Obtener módulos filtrados por aplicación
-   * @param idAplicacion - ID de la aplicación para filtrar módulos
+   * Obtener páginas filtradas por módulo
+   * @param idModulo - ID del módulo para filtrar páginas
    */
-  getModulosPorAplicacion(idAplicacion: number): Observable<ComboItem[]> {
-    return this.http.get<ComboItem[]>(`${this.apiUrl}/modulos/${idAplicacion}`);
+  getPaginasPorModulo(idModulo: number): Observable<ComboItem[]> {
+    return this.http.get<ComboItem[]>(`${this.apiUrl}/paginas/${idModulo}`);
   }
 
   /**
-   * Obtener TODOS los módulos (activos e inactivos)
+   * Obtener TODAS las páginas (activas e inactivas)
    * Para uso en vistas de solo lectura (detalle de ticket)
    */
-  getAllModulos(): Observable<ComboItem[]> {
-    return this.http.get<ComboItem[]>(`${this.apiUrl}/modulos/all`);
+  getAllPaginas(): Observable<ComboItem[]> {
+    return this.http.get<ComboItem[]>(`${this.apiUrl}/paginas/all`);
+  }
+
+  /**
+   * Obtener combo de Sistemas (ID = 16)
+   */
+  getSistemas(): Observable<ComboItem[]> {
+    return this.getComboById(ComboType.SISTEMA);
   }
 
   /**
@@ -129,6 +144,23 @@ export class ComboService {
    */
   getPerfiles(): Observable<ComboItem[]> {
     return this.getComboById(ComboType.PERFIL);
+  }
+
+  /**
+   * Obtener combo de Menús
+   */
+  getMenus(): Observable<ComboItem[]> {
+    return this.getComboById(ComboType.MENU);
+  }
+
+  /**
+   * Obtener combo de Sistemas (filtrado por usuario)
+   * Si el usuario es ADMIN (perfil 1): Ve todos los sistemas
+   * Si NO es admin: Ve solo su sistema
+   */
+  getSistemasDelUsuario(): Observable<ComboItem[]> {
+    // El backend determinará qué sistemas mostrar según el perfil del usuario en el JWT
+    return this.http.get<ComboItem[]>(`${this.apiUrl}/sistemas-usuario`);
   }
 }
 

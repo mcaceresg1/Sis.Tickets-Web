@@ -115,17 +115,17 @@
           </div>
         </div>
 
-        <!-- ✅ MODIFICADO: Multi-select de aplicaciones -->
+        <!-- ✅ MODIFICADO: Multi-select de modulos -->
         <div class="form-group">
-          <label>Aplicaciones <span class="required">*</span></label>
+          <label>Módulos <span class="required">*</span></label>
           <app-multi-select-tags
-            [items]="aplicaciones"
-            [colorMap]="coloresAplicaciones"
-            formControlName="IdAplicacion"
-            placeholder="Seleccione aplicaciones">
+            [items]="modulos"
+            [colorMap]="coloresModulos"
+            formControlName="IdModulo"
+            placeholder="Seleccione modulos">
           </app-multi-select-tags>
-          <div class="invalid-feedback" *ngIf="campoEsInvalido('IdAplicacion')" style="display: block;">
-            {{ obtenerMensajeError('IdAplicacion') }}
+          <div class="invalid-feedback" *ngIf="campoEsInvalido('IdModulo')" style="display: block;">
+            {{ obtenerMensajeError('IdModulo') }}
           </div>
         </div>
 
